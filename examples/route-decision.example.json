@@ -1,0 +1,31 @@
+{
+  "apiVersion": "modelrouter.socioprophet.dev/v1",
+  "kind": "ModelRouteDecision",
+  "metadata": {
+    "decisionId": "route-decision-demo-001",
+    "requestId": "route-request-demo-001",
+    "createdAt": "2026-04-29T00:00:00Z"
+  },
+  "spec": {
+    "task": "summarize",
+    "privacyMode": "local-first",
+    "candidateRefs": [
+      "model://local/small-language@0.1.0",
+      "model://hosted/frontier-language@0.1.0"
+    ],
+    "selectedCandidateRef": "model://local/small-language@0.1.0",
+    "decisionStatus": "selected",
+    "reasonCodes": [
+      "task-supported",
+      "privacy-local-first",
+      "guardrail-compatible",
+      "eval-confidence-above-threshold",
+      "locality-preferred"
+    ],
+    "policyRef": "policy://model-router/local-first-v1",
+    "guardrailRef": "guardrail://fabric/default-safe-text-v1",
+    "evidenceRef": "evidence://model-router/demo/request-001",
+    "ledgerRef": "ledger://model-governance/demo",
+    "fallbackRefs": ["model://hosted/frontier-language@0.1.0"]
+  }
+}

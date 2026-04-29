@@ -1,0 +1,41 @@
+{
+  "apiVersion": "modelrouter.socioprophet.dev/v1",
+  "kind": "ModelRouteRequest",
+  "metadata": {
+    "requestId": "route-request-demo-001",
+    "actorRef": "agent://socioprophet/demo-analyst",
+    "workstream": "model-fabric"
+  },
+  "spec": {
+    "task": "summarize",
+    "privacyMode": "local-first",
+    "policyRef": "policy://model-router/local-first-v1",
+    "guardrailRef": "guardrail://fabric/default-safe-text-v1",
+    "ledgerRef": "ledger://model-governance/demo",
+    "evidenceRef": "evidence://model-router/demo/request-001",
+    "candidates": [
+      {
+        "candidateRef": "model://local/small-language@0.1.0",
+        "locality": "local",
+        "sizeClass": "small",
+        "costTier": "low",
+        "latencyTier": "low",
+        "qualityTier": "medium",
+        "evalConfidence": 0.82,
+        "guardrailCompatible": true,
+        "supportedTasks": ["summarize", "extract"]
+      },
+      {
+        "candidateRef": "model://hosted/frontier-language@0.1.0",
+        "locality": "hosted",
+        "sizeClass": "large",
+        "costTier": "high",
+        "latencyTier": "medium",
+        "qualityTier": "high",
+        "evalConfidence": 0.93,
+        "guardrailCompatible": true,
+        "supportedTasks": ["summarize", "reason", "extract"]
+      }
+    ]
+  }
+}

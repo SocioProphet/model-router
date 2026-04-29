@@ -1,0 +1,23 @@
+{
+  "apiVersion": "modelrouter.socioprophet.dev/v1",
+  "kind": "ModelRoutePolicy",
+  "metadata": {
+    "policyRef": "policy://model-router/local-first-v1",
+    "version": "0.1.0"
+  },
+  "spec": {
+    "privacyMode": "local-first",
+    "preferLocal": true,
+    "allowHostedFallback": true,
+    "minimumEvalConfidence": 0.75,
+    "allowedLocalities": ["local", "hosted"],
+    "requiredGuardrailCompatibility": true,
+    "scoreWeights": {
+      "quality": 0.35,
+      "evalConfidence": 0.3,
+      "locality": 0.2,
+      "cost": 0.1,
+      "latency": 0.05
+    }
+  }
+}
