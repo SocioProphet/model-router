@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://socioprophet.io/schemas/model-router/professional-intelligence-routing-decision.schema.json",
+  "title": "ProfessionalIntelligenceRoutingDecision",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "decisionId",
+    "requestId",
+    "workroomRef",
+    "agentRef",
+    "task",
+    "constraints",
+    "candidateRoutes",
+    "selectedRoute",
+    "fallbackRoute",
+    "policyDecisionRefs",
+    "evidenceRefs"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "v0.1" },
+    "decisionId": { "type": "string", "minLength": 1 },
+    "requestId": { "type": "string", "minLength": 1 },
+    "workroomRef": { "type": "string", "minLength": 1 },
+    "agentRef": { "type": "string", "minLength": 1 },
+    "task": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["taskId", "taskType", "description"],
+      "properties": {
+        "taskId": { "type": "string", "minLength": 1 },
+        "taskType": { "type": "string", "enum": ["context-summary", "review-packet", "policy-sensitive-summary", "classification", "routing-test"] },
+        "description": { "type": "string", "minLength": 1 }
+      }
+    },
+    "constraints": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["privacyClass", "latencyBudgetMs", "costCeilingUsd", "minQualityScore", "evidenceRequired"],
+      "properties": {
+        "privacyClass": { "type": "string", "enum": ["public", "internal", "confidential", "restricted"] },
+        "latencyBudgetMs": { "type": "integer", "minimum": 1 },
+        "costCeilingUsd": { "type": "number", "minimum": 0 },
+        "minQualityScore": { "type": "number", "minimum": 0, "maximum": 1 },
+        "evidenceRequired": { "type": "boolean" },
+        "hostedModelAllowed": { "type": "boolean" },
+        "localPreferred": { "type": "boolean" }
+      }
+    },
+    "candidateRoutes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["routeId", "routeType", "qualityScore", "estimatedLatencyMs", "estimatedCostUsd", "allowed"],
+        "properties": {
+          "routeId": { "type": "string", "minLength": 1 },
+          "routeType": { "type": "string", "enum": ["local", "hosted", "service", "fallback"] },
+          "qualityScore": { "type": "number", "minimum": 0, "maximum": 1 },
+          "estimatedLatencyMs": { "type": "integer", "minimum": 1 },
+          "estimatedCostUsd": { "type": "number", "minimum": 0 },
+          "allowed": { "type": "boolean" },
+          "reason": { "type": "string" }
+        }
+      }
+    },
+    "selectedRoute": { "type": "string", "minLength": 1 },
+    "fallbackRoute": { "type": "string", "minLength": 1 },
+    "policyDecisionRefs": { "type": "array", "items": { "type": "string" } },
+    "evidenceRefs": { "type": "array", "items": { "type": "string" } },
+    "rationale": { "type": "string" }
+  }
+}
