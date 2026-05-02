@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.socioprophet.ai/model-router/local-personal-route-binding.schema.json",
+  "title": "LocalPersonalRouteBinding",
+  "description": "Model-router binding that chooses between base local model profiles, user-personalized artifacts, and hosted fallbacks under privacy and evidence policy.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "bindingId",
+    "subject",
+    "defaultLocalProfileRef",
+    "personalization",
+    "routes",
+    "policy",
+    "evidence"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "v0.1" },
+    "kind": { "const": "LocalPersonalRouteBinding" },
+    "bindingId": { "type": "string", "pattern": "^urn:socioprophet:model-router-binding:" },
+    "subject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["userRef", "workspaceRef"],
+      "properties": {
+        "userRef": { "type": "string" },
+        "workspaceRef": { "type": "string" },
+        "tenantRef": { "type": ["string", "null"] },
+        "deviceRef": { "type": ["string", "null"] }
+      }
+    },
+    "defaultLocalProfileRef": { "type": "string", "pattern": "^urn:srcos:model-profile:" },
+    "qualityFallbackLocalProfileRef": { "type": ["string", "null"] },
+    "personalization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["enabled", "governanceContractRef", "artifactRef", "defaultState"],
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "governanceContractRef": { "type": ["string", "null"] },
+        "artifactRef": { "type": ["string", "null"] },
+        "defaultState": { "type": "string", "enum": ["disabled", "personal-only", "candidate", "active", "revoked"] },
+        "activationRequiresLedgerApproval": { "type": "boolean", "default": true }
+      }
+    },
+    "routes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["routeId", "taskClass", "preferredTarget"],
+        "properties": {
+          "routeId": { "type": "string" },
+          "taskClass": {
+            "type": "string",
+            "enum": ["router", "triage", "summarization", "rewrite", "office-assist", "agent-machine-assist", "offline-fallback", "coding-assist", "privacy-first-chat", "complex-reasoning"]
+          },
+          "preferredTarget": { "type": "string", "enum": ["base-local", "personal-local", "quality-local", "hosted", "deny"] },
+          "fallbackTarget": { "type": ["string", "null"], "enum": ["base-local", "personal-local", "quality-local", "hosted", "deny", null] },
+          "requiresConsent": { "type": "boolean", "default": false },
+          "requiresNetwork": { "type": "boolean", "default": false }
+        }
+      }
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["localFirst", "promptEgressDefault", "hostedFallbackRequiresPolicy", "promptHashOnlyEvidence"],
+      "properties": {
+        "localFirst": { "type": "boolean" },
+        "promptEgressDefault": { "type": "string", "enum": ["deny", "allow-with-policy"] },
+        "hostedFallbackRequiresPolicy": { "type": "boolean" },
+        "personalizationRequiresConsent": { "type": "boolean", "default": true },
+        "promptHashOnlyEvidence": { "type": "boolean" }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["emitRouteDecision", "emitRuntimeHealth", "emitGovernanceRefs"],
+      "properties": {
+        "emitRouteDecision": { "type": "boolean" },
+        "emitRuntimeHealth": { "type": "boolean" },
+        "emitGovernanceRefs": { "type": "boolean" },
+        "ledgerRef": { "type": "string" }
+      }
+    }
+  }
+}
