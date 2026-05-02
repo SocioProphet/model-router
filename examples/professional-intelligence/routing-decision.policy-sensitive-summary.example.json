@@ -1,0 +1,59 @@
+{
+  "schemaVersion": "v0.1",
+  "decisionId": "route-decision://pi-demo-0001/policy-sensitive-summary",
+  "requestId": "route-request://pi-demo-0001/policy-sensitive-summary",
+  "workroomRef": "workroom://workroom-demo-0001",
+  "agentRef": "agent://professional-intelligence/policy-review-agent",
+  "task": {
+    "taskId": "task-demo-policy-0001",
+    "taskType": "policy-sensitive-summary",
+    "description": "Prepare a policy-sensitive internal summary requiring reviewer approval before release."
+  },
+  "constraints": {
+    "privacyClass": "confidential",
+    "latencyBudgetMs": 7000,
+    "costCeilingUsd": 0.02,
+    "minQualityScore": 0.7,
+    "evidenceRequired": true,
+    "hostedModelAllowed": false,
+    "localPreferred": true
+  },
+  "candidateRoutes": [
+    {
+      "routeId": "route://local/policy-summarizer",
+      "routeType": "local",
+      "qualityScore": 0.76,
+      "estimatedLatencyMs": 2200,
+      "estimatedCostUsd": 0,
+      "allowed": true,
+      "reason": "Local summarizer satisfies confidentiality and evidence requirements."
+    },
+    {
+      "routeId": "route://hosted/frontier",
+      "routeType": "hosted",
+      "qualityScore": 0.94,
+      "estimatedLatencyMs": 2500,
+      "estimatedCostUsd": 0.09,
+      "allowed": false,
+      "reason": "Hosted model is disallowed for confidential policy-sensitive summaries."
+    },
+    {
+      "routeId": "route://fallback/no-summary-human-review",
+      "routeType": "fallback",
+      "qualityScore": 0.5,
+      "estimatedLatencyMs": 300,
+      "estimatedCostUsd": 0,
+      "allowed": true,
+      "reason": "Fallback routes to human review without generated summary."
+    }
+  ],
+  "selectedRoute": "route://local/policy-summarizer",
+  "fallbackRoute": "route://fallback/no-summary-human-review",
+  "policyDecisionRefs": [
+    "policy-decision://ppd-review-0001"
+  ],
+  "evidenceRefs": [
+    "evidence://model-router/pi-demo-0001/policy-sensitive-summary"
+  ],
+  "rationale": "Use local summarization because the action is confidential, policy-sensitive, and approval-bound."
+}
