@@ -1,0 +1,59 @@
+{
+  "schemaVersion": "v0.1",
+  "kind": "LocalPersonalRouteBinding",
+  "bindingId": "urn:socioprophet:model-router-binding:demo-user-local-llama32",
+  "subject": {
+    "userRef": "urn:socioprophet:user:demo-user",
+    "workspaceRef": "urn:socioprophet:workspace:demo-workspace",
+    "tenantRef": "urn:socioprophet:tenant:demo-tenant",
+    "deviceRef": "urn:srcos:device:demo-laptop"
+  },
+  "defaultLocalProfileRef": "urn:srcos:model-profile:local-llama32-1b",
+  "qualityFallbackLocalProfileRef": "urn:srcos:model-profile:local-llama32-3b",
+  "personalization": {
+    "enabled": true,
+    "governanceContractRef": "urn:socioprophet:personal-tuning-contract:demo-user-local-llama32",
+    "artifactRef": "urn:socioprophet:model-adapter:demo-user-local-llama32-lora",
+    "defaultState": "personal-only",
+    "activationRequiresLedgerApproval": true
+  },
+  "routes": [
+    {
+      "routeId": "local-router",
+      "taskClass": "router",
+      "preferredTarget": "base-local",
+      "fallbackTarget": "quality-local",
+      "requiresConsent": false,
+      "requiresNetwork": false
+    },
+    {
+      "routeId": "office-assist-personal",
+      "taskClass": "office-assist",
+      "preferredTarget": "personal-local",
+      "fallbackTarget": "base-local",
+      "requiresConsent": true,
+      "requiresNetwork": false
+    },
+    {
+      "routeId": "complex-reasoning-policy-gated",
+      "taskClass": "complex-reasoning",
+      "preferredTarget": "hosted",
+      "fallbackTarget": "quality-local",
+      "requiresConsent": true,
+      "requiresNetwork": true
+    }
+  ],
+  "policy": {
+    "localFirst": true,
+    "promptEgressDefault": "deny",
+    "hostedFallbackRequiresPolicy": true,
+    "personalizationRequiresConsent": true,
+    "promptHashOnlyEvidence": true
+  },
+  "evidence": {
+    "emitRouteDecision": true,
+    "emitRuntimeHealth": true,
+    "emitGovernanceRefs": true,
+    "ledgerRef": "SocioProphet/model-governance-ledger"
+  }
+}
