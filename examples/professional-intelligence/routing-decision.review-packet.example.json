@@ -1,0 +1,59 @@
+{
+  "schemaVersion": "v0.1",
+  "decisionId": "route-decision://pi-demo-0001/review-packet",
+  "requestId": "route-request://pi-demo-0001/review-packet",
+  "workroomRef": "workroom://workroom-demo-0001",
+  "agentRef": "agent://professional-intelligence/opportunity-review-agent",
+  "task": {
+    "taskId": "task-demo-0001",
+    "taskType": "review-packet",
+    "description": "Generate an internal review packet draft using workroom-scoped context."
+  },
+  "constraints": {
+    "privacyClass": "internal",
+    "latencyBudgetMs": 5000,
+    "costCeilingUsd": 0.05,
+    "minQualityScore": 0.75,
+    "evidenceRequired": true,
+    "hostedModelAllowed": false,
+    "localPreferred": true
+  },
+  "candidateRoutes": [
+    {
+      "routeId": "route://local/small-reasoner",
+      "routeType": "local",
+      "qualityScore": 0.8,
+      "estimatedLatencyMs": 1800,
+      "estimatedCostUsd": 0,
+      "allowed": true,
+      "reason": "Local route satisfies privacy, latency, cost, and quality thresholds."
+    },
+    {
+      "routeId": "route://hosted/frontier",
+      "routeType": "hosted",
+      "qualityScore": 0.92,
+      "estimatedLatencyMs": 2600,
+      "estimatedCostUsd": 0.08,
+      "allowed": false,
+      "reason": "Hosted route is not allowed for this internal workroom-scoped step."
+    },
+    {
+      "routeId": "route://fallback/extractive-template",
+      "routeType": "fallback",
+      "qualityScore": 0.65,
+      "estimatedLatencyMs": 500,
+      "estimatedCostUsd": 0,
+      "allowed": true,
+      "reason": "Fallback can emit a conservative packet if the selected local route fails."
+    }
+  ],
+  "selectedRoute": "route://local/small-reasoner",
+  "fallbackRoute": "route://fallback/extractive-template",
+  "policyDecisionRefs": [
+    "policy-decision://ppd-allow-0001"
+  ],
+  "evidenceRefs": [
+    "evidence://model-router/pi-demo-0001/review-packet"
+  ],
+  "rationale": "Use the local route because the step is internal, evidence-bound, cost-constrained, and local-preferred."
+}
