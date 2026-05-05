@@ -1,0 +1,319 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.socioprophet.ai/model-router/agent-execution-model-routing-policy.schema.json",
+  "title": "AgentExecutionModelRoutingPolicy",
+  "description": "Policy contract for routing agent execution-chain stages across no-model, local/cheap, standard, high-end, and pro reasoning lanes with explicit escalation gates and evidence.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "policyId",
+    "scope",
+    "defaultPosture",
+    "modelLanes",
+    "taskClasses",
+    "chainStages",
+    "escalationPolicy",
+    "contextPolicy",
+    "toolPolicy",
+    "evidence",
+    "enforcement"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "v0.1" },
+    "kind": { "const": "AgentExecutionModelRoutingPolicy" },
+    "policyId": { "type": "string", "pattern": "^urn:socioprophet:model-routing-policy:" },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["appliesTo", "executionSurfaces"],
+      "properties": {
+        "appliesTo": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string" }
+        },
+        "executionSurfaces": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "enum": [
+              "agentplane",
+              "claude-code",
+              "codex",
+              "cursor",
+              "opencode",
+              "github-copilot-agent",
+              "sourceos-agent-machine",
+              "native-assistant-bridge",
+              "manual-operator"
+            ]
+          }
+        },
+        "repos": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "defaultPosture": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "routingRule",
+        "highEndDefault",
+        "hostedFallback",
+        "localFirst",
+        "failClosed"
+      ],
+      "properties": {
+        "routingRule": { "type": "string" },
+        "highEndDefault": { "type": "string", "enum": ["deny", "defer", "allow"] },
+        "hostedFallback": { "type": "string", "enum": ["deny", "policy-gated", "allow"] },
+        "localFirst": { "type": "boolean" },
+        "failClosed": { "type": "boolean" },
+        "mechanicalVerificationPreferred": { "type": "boolean" }
+      }
+    },
+    "modelLanes": {
+      "type": "array",
+      "minItems": 4,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["laneId", "costClass", "allowedUse", "disallowedUse"],
+        "properties": {
+          "laneId": {
+            "type": "string",
+            "enum": ["no-model", "local-cheap", "cheap", "standard", "high-end", "pro"]
+          },
+          "costClass": {
+            "type": "string",
+            "enum": ["none", "low", "medium", "high", "maximum"]
+          },
+          "providerProfiles": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "allowedUse": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "type": "string" }
+          },
+          "disallowedUse": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "requiresEscalationReceipt": { "type": "boolean" }
+        }
+      }
+    },
+    "taskClasses": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "taskClass",
+          "defaultLane",
+          "allowedEscalationLanes",
+          "requiresHumanJustification"
+        ],
+        "properties": {
+          "taskClass": { "type": "string" },
+          "description": { "type": "string" },
+          "defaultLane": {
+            "type": "string",
+            "enum": ["no-model", "local-cheap", "cheap", "standard", "high-end", "pro"]
+          },
+          "allowedEscalationLanes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["cheap", "standard", "high-end", "pro"]
+            }
+          },
+          "requiresHumanJustification": { "type": "boolean" },
+          "requiresEvidence": { "type": "boolean" },
+          "requiresNetwork": { "type": "boolean" },
+          "examples": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      }
+    },
+    "chainStages": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["stage", "defaultLane", "maxLaneWithoutEscalation", "requiredEvidence"],
+        "properties": {
+          "stage": {
+            "type": "string",
+            "enum": [
+              "intake",
+              "classification",
+              "retrieval",
+              "planning",
+              "execution",
+              "tool-use",
+              "verification",
+              "review",
+              "finalization"
+            ]
+          },
+          "defaultLane": {
+            "type": "string",
+            "enum": ["no-model", "local-cheap", "cheap", "standard", "high-end", "pro"]
+          },
+          "maxLaneWithoutEscalation": {
+            "type": "string",
+            "enum": ["no-model", "local-cheap", "cheap", "standard", "high-end", "pro"]
+          },
+          "requiredEvidence": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      }
+    },
+    "escalationPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "allowedReasons",
+        "requireReasonForHighEnd",
+        "requireReasonForPro",
+        "repeatedFailureThreshold",
+        "deescalateAfterPlan",
+        "denyChattyThinkingOnHighEnd"
+      ],
+      "properties": {
+        "allowedReasons": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "enum": [
+              "architecture-decision",
+              "hard-debugging",
+              "security-review",
+              "privacy-review",
+              "multi-repo-migration",
+              "irreversible-production-decision",
+              "high-stakes-synthesis",
+              "conflicting-evidence-resolution",
+              "repeated-standard-lane-failure",
+              "release-gate-review"
+            ]
+          }
+        },
+        "requireReasonForHighEnd": { "type": "boolean" },
+        "requireReasonForPro": { "type": "boolean" },
+        "repeatedFailureThreshold": { "type": "integer", "minimum": 1, "maximum": 5 },
+        "deescalateAfterPlan": { "type": "boolean" },
+        "denyChattyThinkingOnHighEnd": { "type": "boolean" },
+        "budgetWindow": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "unit": { "type": "string", "enum": ["task", "session", "day", "week"] },
+            "highEndMaxShare": { "type": "number", "minimum": 0, "maximum": 1 },
+            "proMaxShare": { "type": "number", "minimum": 0, "maximum": 1 }
+          }
+        }
+      }
+    },
+    "contextPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "clearOnTaskSwitch",
+        "compactBeforeContextLimit",
+        "preferPathReferences",
+        "trimLogsByDefault",
+        "redactSecrets",
+        "disableNoncriticalConnectorsByDefault"
+      ],
+      "properties": {
+        "clearOnTaskSwitch": { "type": "boolean" },
+        "compactBeforeContextLimit": { "type": "boolean" },
+        "preferPathReferences": { "type": "boolean" },
+        "trimLogsByDefault": { "type": "boolean" },
+        "maxLogLinesWithoutApproval": { "type": "integer", "minimum": 1 },
+        "redactSecrets": { "type": "boolean" },
+        "disableNoncriticalConnectorsByDefault": { "type": "boolean" },
+        "promptStorage": { "type": "string", "enum": ["hash-only", "redacted", "full"] }
+      }
+    },
+    "toolPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "toolsOffUnlessNeeded",
+        "networkToolsRequireReason",
+        "writeToolsRequireEvidence",
+        "repoMutationRequiresBranchOrExplicitDirectCommit",
+        "mechanicalVerificationRequired"
+      ],
+      "properties": {
+        "toolsOffUnlessNeeded": { "type": "boolean" },
+        "networkToolsRequireReason": { "type": "boolean" },
+        "writeToolsRequireEvidence": { "type": "boolean" },
+        "repoMutationRequiresBranchOrExplicitDirectCommit": { "type": "boolean" },
+        "mechanicalVerificationRequired": { "type": "boolean" }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "emitRouteDecision",
+        "emitEscalationReceipt",
+        "emitCostClass",
+        "emitContextPolicy",
+        "emitToolPolicy",
+        "promptHashOnly",
+        "ledgerRefs"
+      ],
+      "properties": {
+        "emitRouteDecision": { "type": "boolean" },
+        "emitEscalationReceipt": { "type": "boolean" },
+        "emitCostClass": { "type": "boolean" },
+        "emitContextPolicy": { "type": "boolean" },
+        "emitToolPolicy": { "type": "boolean" },
+        "promptHashOnly": { "type": "boolean" },
+        "ledgerRefs": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "enforcement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "decisionAbi",
+        "onViolation",
+        "denyHighEndWithoutReason",
+        "denyProWithoutReason",
+        "downgradePreferred",
+        "routeDecisionRequiredBeforeExecution"
+      ],
+      "properties": {
+        "decisionAbi": { "type": "string" },
+        "onViolation": { "type": "string", "enum": ["deny", "defer", "quarantine"] },
+        "denyHighEndWithoutReason": { "type": "boolean" },
+        "denyProWithoutReason": { "type": "boolean" },
+        "downgradePreferred": { "type": "boolean" },
+        "routeDecisionRequiredBeforeExecution": { "type": "boolean" }
+      }
+    }
+  }
+}
