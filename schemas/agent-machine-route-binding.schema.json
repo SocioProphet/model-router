@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.socioprophet.ai/model-router/agent-machine-route-binding.schema.json",
+  "title": "AgentMachineRouteBinding",
+  "description": "Model-router binding that links SourceOSModelCarryRef, ModelResidency, PlacementFact, and AgentMachineReceipt references into a governed local Agent Machine route.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "bindingId",
+    "taskClass",
+    "sourceosModelCarryRef",
+    "runtimeRefs",
+    "routePolicy",
+    "evidence"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "v0.1" },
+    "kind": { "const": "AgentMachineRouteBinding" },
+    "bindingId": { "type": "string", "pattern": "^urn:socioprophet:model-router:agent-machine-binding:" },
+    "taskClass": { "type": "string", "enum": ["router", "triage", "summarization", "rewrite", "office-assist", "agent-machine-assist", "offline-fallback", "coding-assist", "privacy-first-chat", "complex-reasoning"] },
+    "sourceosModelCarryRef": { "type": "string", "pattern": "^urn:srcos:model-carry-ref:" },
+    "runtimeRefs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["inferenceProviderRef", "placementFactRef"],
+      "properties": {
+        "inferenceProviderRef": { "type": "string", "pattern": "^urn:srcos:inference-provider:" },
+        "modelResidencyRef": { "type": ["string", "null"], "pattern": "^urn:srcos:model-residency:" },
+        "placementFactRef": { "type": "string", "pattern": "^urn:srcos:placement-fact:" },
+        "lastAgentMachineReceiptRef": { "type": ["string", "null"], "pattern": "^urn:srcos:agent-machine-receipt:" }
+      }
+    },
+    "routePolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["localFirst", "requiresPolicyDecision", "promptEgress", "hostedFallbackAllowed", "cacheReuseRequiresPolicy"],
+      "properties": {
+        "localFirst": { "type": "boolean", "const": true },
+        "requiresPolicyDecision": { "type": "boolean", "const": true },
+        "promptEgress": { "type": "string", "enum": ["deny", "allow-with-policy"] },
+        "hostedFallbackAllowed": { "type": "boolean" },
+        "cacheReuseRequiresPolicy": { "type": "boolean", "const": true },
+        "minimumResidencyState": { "type": "string", "enum": ["cached", "loaded-cold", "loaded-warm", "pinned"] }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["emitRouteDecision", "emitPlacementFactRef", "emitAgentMachineReceiptRef", "promptHashOnly"],
+      "properties": {
+        "emitRouteDecision": { "type": "boolean", "const": true },
+        "emitPlacementFactRef": { "type": "boolean", "const": true },
+        "emitAgentMachineReceiptRef": { "type": "boolean", "const": true },
+        "promptHashOnly": { "type": "boolean", "const": true },
+        "ledgerRef": { "type": "string" }
+      }
+    }
+  }
+}
