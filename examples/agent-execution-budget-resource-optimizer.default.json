@@ -1,0 +1,139 @@
+{
+  "schemaVersion": "v0.1",
+  "kind": "AgentExecutionBudgetResourceOptimizer",
+  "optimizerId": "urn:socioprophet:model-routing-optimizer:agent-execution-default",
+  "policyRef": "urn:socioprophet:model-routing-policy:agent-execution-default",
+  "objective": {
+    "primary": "minimize-cost-subject-to-quality-and-risk",
+    "orderedPreferences": [
+      "policy-compliance",
+      "privacy",
+      "safety",
+      "quality-floor",
+      "budget",
+      "local-availability",
+      "latency",
+      "quota-preservation",
+      "provider-health",
+      "deterministic-verification"
+    ]
+  },
+  "budgetPolicy": {
+    "currency": "USD",
+    "windows": [
+      {
+        "window": "task",
+        "maxSpend": 2.0,
+        "highEndMaxShare": 0.25,
+        "proMaxShare": 0.05
+      },
+      {
+        "window": "session",
+        "maxSpend": 20.0,
+        "highEndMaxShare": 0.2,
+        "proMaxShare": 0.03
+      },
+      {
+        "window": "day",
+        "maxSpend": 100.0,
+        "highEndMaxShare": 0.15,
+        "proMaxShare": 0.02
+      }
+    ],
+    "premiumReserveShare": 0.35,
+    "onBudgetPressure": "downgrade"
+  },
+  "resourcePolicy": {
+    "requiredSignals": [
+      "localModelProfileAvailable",
+      "localServiceHealthy",
+      "batteryState",
+      "thermalState",
+      "memoryAvailableBytes",
+      "networkAvailable",
+      "providerQuotaRemaining",
+      "providerErrorRate",
+      "providerLatencyP95Ms",
+      "estimatedInputTokens",
+      "estimatedOutputTokens"
+    ],
+    "localAdmission": {
+      "preferWhenAvailable": true,
+      "denyWhenThermalCritical": true,
+      "denyWhenBatteryCritical": true,
+      "minMemoryAvailableBytes": 2147483648,
+      "allowedProfileRefs": [
+        "urn:srcos:model-profile:local-llama32-1b",
+        "urn:srcos:model-profile:local-llama32-3b"
+      ]
+    },
+    "hostedAdmission": {
+      "requiresPolicy": true,
+      "requiresNetwork": true,
+      "denyWhenQuotaUnknown": true,
+      "denyWhenProviderUnhealthy": true,
+      "maxProviderLatencyP95Ms": 30000,
+      "maxProviderErrorRate": 0.05
+    }
+  },
+  "qualityPolicy": {
+    "riskFloors": [
+      {
+        "riskClass": "low",
+        "minimumLane": "local-cheap",
+        "requiresVerification": false
+      },
+      {
+        "riskClass": "medium",
+        "minimumLane": "standard",
+        "requiresVerification": true
+      },
+      {
+        "riskClass": "high",
+        "minimumLane": "high-end",
+        "requiresVerification": true
+      },
+      {
+        "riskClass": "critical",
+        "minimumLane": "pro",
+        "requiresVerification": true
+      }
+    ],
+    "onQualityUncertain": "ask-standard-review"
+  },
+  "selectionPolicy": {
+    "candidateOrder": [
+      "no-model",
+      "local-cheap",
+      "cheap",
+      "standard",
+      "high-end",
+      "pro"
+    ],
+    "tieBreakers": [
+      "lower-cost",
+      "local-first",
+      "higher-quota-remaining",
+      "higher-provider-health",
+      "lower-latency",
+      "less-context-egress"
+    ],
+    "estimateBeforeRoute": true,
+    "neverSilentlyUpgrade": true
+  },
+  "evidence": {
+    "emitBudgetDecision": true,
+    "emitResourceSnapshot": true,
+    "emitQuotaSnapshot": true,
+    "emitCandidateSet": true,
+    "emitSelectedCandidate": true,
+    "promptHashOnly": true
+  },
+  "enforcement": {
+    "decisionAbi": "sourceos.guardrail.decision.v0.1",
+    "failClosedOnMissingSignals": true,
+    "denyOnBudgetExhausted": true,
+    "denyOnUnknownQuotaForPremium": true,
+    "routeBeforeExecution": true
+  }
+}
