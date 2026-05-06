@@ -23,6 +23,25 @@ examples/local-personal-route-binding.llama32.json
 tools/validate_local_personal_route_bindings.py
 ```
 
+## Agent execution routing policy
+
+The router also owns the canonical policy for model use inside agent execution chains. The policy converts the operating rule into a machine-readable contract:
+
+```text
+Use the cheapest lane that can safely complete the next irreversible decision.
+```
+
+The contract defines no-model, local-cheap, cheap, standard, high-end, and pro lanes; task classes; chain stages; escalation reasons; context limits; tool-use gates; and evidence requirements.
+
+Contract and example:
+
+```text
+schemas/agent-execution-model-routing-policy.schema.json
+examples/agent-execution-model-routing-policy.default.json
+tools/validate_agent_execution_model_routing_policies.py
+docs/agent-execution-model-routing-policy.md
+```
+
 ## Default local posture
 
 The first SourceOS local profiles are:
@@ -40,7 +59,10 @@ The 1B profile is the laptop-safe router/triage/summarization default. The 3B pr
 - Prompt egress is denied by default.
 - Hosted fallback requires policy approval.
 - Per-user personalization requires consent and a model-governance-ledger contract.
-- Evidence records route decisions, runtime health, and governance references.
+- High-end/pro agent execution lanes are denied unless an allowed escalation reason and receipt exist.
+- Routine execution de-escalates to standard or cheaper lanes after planning.
+- Verification defaults to deterministic tools rather than another expensive model call.
+- Evidence records route decisions, escalation receipts, runtime health, cost class, context policy, tool policy, and governance references.
 - Prompt evidence should be hash-only by default.
 
 ## Boundary
@@ -48,12 +70,16 @@ The 1B profile is the laptop-safe router/triage/summarization default. The 3B pr
 | Repo | Responsibility |
 |---|---|
 | `SourceOS-Linux/sourceos-model-carry` | Local model profiles and service refs. |
-| `SocioProphet/model-governance-ledger` | Per-user consent, data boundary, evaluation, promotion, revocation. |
+| `SocioProphet/model-governance-ledger` | Per-user consent, data boundary, evaluation, promotion, revocation, and model-routing escalation receipts. |
 | `SociOS-Linux/socios` | Opt-in orchestration for personalization workflows. |
-| `SocioProphet/model-router` | Runtime route binding and policy-aware target selection. |
+| `SocioProphet/model-router` | Runtime route binding, agent execution model-routing policy, and policy-aware target selection. |
+| `SocioProphet/agentplane` | Execution-chain evidence and run/replay artifacts for routed agent work. |
+| `SocioProphet/guardrail-fabric` | Fail-closed policy decisions for tool hooks, model-lane escalation, and write/network gates. |
+| `SocioProphet/policy-fabric` | Policy packaging, inheritance, validation, and release review. |
 
 ## Validation
 
 ```bash
 python3 tools/validate_local_personal_route_bindings.py
+python3 tools/validate_agent_execution_model_routing_policies.py
 ```
