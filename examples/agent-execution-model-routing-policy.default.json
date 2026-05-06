@@ -1,0 +1,442 @@
+{
+  "schemaVersion": "v0.1",
+  "kind": "AgentExecutionModelRoutingPolicy",
+  "policyId": "urn:socioprophet:model-routing-policy:agent-execution-default",
+  "scope": {
+    "appliesTo": [
+      "SocioProphet",
+      "SourceOS-Linux",
+      "SociOS-Linux"
+    ],
+    "executionSurfaces": [
+      "agentplane",
+      "claude-code",
+      "codex",
+      "github-copilot-agent",
+      "sourceos-agent-machine",
+      "manual-operator"
+    ],
+    "repos": [
+      "SocioProphet/model-router",
+      "SocioProphet/agentplane",
+      "SocioProphet/guardrail-fabric",
+      "SocioProphet/model-governance-ledger",
+      "SocioProphet/policy-fabric"
+    ]
+  },
+  "defaultPosture": {
+    "routingRule": "Use the cheapest lane that can safely complete the next irreversible decision; high-end models make decisions, they do not do chores.",
+    "highEndDefault": "deny",
+    "hostedFallback": "policy-gated",
+    "localFirst": true,
+    "failClosed": true,
+    "mechanicalVerificationPreferred": true
+  },
+  "modelLanes": [
+    {
+      "laneId": "no-model",
+      "costClass": "none",
+      "providerProfiles": [
+        "shell",
+        "grep",
+        "ripgrep",
+        "tests",
+        "linters",
+        "formatters",
+        "json-schema-validation"
+      ],
+      "allowedUse": [
+        "mechanical verification",
+        "repository inspection",
+        "deterministic formatting",
+        "build/test execution"
+      ],
+      "disallowedUse": [
+        "semantic judgment",
+        "architecture decision",
+        "security judgment"
+      ],
+      "requiresEscalationReceipt": false
+    },
+    {
+      "laneId": "local-cheap",
+      "costClass": "low",
+      "providerProfiles": [
+        "SourceOS local small model",
+        "local router profile",
+        "local summarizer profile"
+      ],
+      "allowedUse": [
+        "routing classification",
+        "short summarization",
+        "log triage",
+        "safe rewrite",
+        "command explanation"
+      ],
+      "disallowedUse": [
+        "irreversible production decision",
+        "security-sensitive final approval",
+        "multi-repo architecture"
+      ],
+      "requiresEscalationReceipt": false
+    },
+    {
+      "laneId": "cheap",
+      "costClass": "low",
+      "providerProfiles": [
+        "Claude Haiku-class",
+        "GPT mini/instant-class"
+      ],
+      "allowedUse": [
+        "formatting",
+        "boilerplate",
+        "simple edits",
+        "short summaries",
+        "task classification",
+        "first-pass issue drafting"
+      ],
+      "disallowedUse": [
+        "high-stakes synthesis",
+        "complex security review",
+        "final architecture selection"
+      ],
+      "requiresEscalationReceipt": false
+    },
+    {
+      "laneId": "standard",
+      "costClass": "medium",
+      "providerProfiles": [
+        "Claude Sonnet-class",
+        "GPT standard reasoning-class"
+      ],
+      "allowedUse": [
+        "normal coding",
+        "test writing",
+        "documentation",
+        "straightforward debugging",
+        "repo-local refactors",
+        "PR preparation"
+      ],
+      "disallowedUse": [
+        "unbounded exploration",
+        "prolonged chatty brainstorming after plan exists"
+      ],
+      "requiresEscalationReceipt": false
+    },
+    {
+      "laneId": "high-end",
+      "costClass": "high",
+      "providerProfiles": [
+        "Claude Opus-class",
+        "GPT Thinking flagship-class"
+      ],
+      "allowedUse": [
+        "architecture decisions",
+        "hard debugging",
+        "security review",
+        "multi-repo migration planning",
+        "conflicting evidence resolution"
+      ],
+      "disallowedUse": [
+        "formatting",
+        "boilerplate",
+        "long conversational wandering",
+        "routine implementation after plan exists"
+      ],
+      "requiresEscalationReceipt": true
+    },
+    {
+      "laneId": "pro",
+      "costClass": "maximum",
+      "providerProfiles": [
+        "GPT Pro/research-grade lane",
+        "maximum reasoning lane"
+      ],
+      "allowedUse": [
+        "hardest high-stakes synthesis",
+        "release-blocking adversarial review",
+        "long-running research-grade reasoning"
+      ],
+      "disallowedUse": [
+        "routine coding",
+        "drafting",
+        "summarization",
+        "first-pass planning"
+      ],
+      "requiresEscalationReceipt": true
+    }
+  ],
+  "taskClasses": [
+    {
+      "taskClass": "formatting-rewrite",
+      "description": "Text formatting, tone rewrite, grammar, boilerplate, short compression.",
+      "defaultLane": "cheap",
+      "allowedEscalationLanes": [
+        "standard"
+      ],
+      "requiresHumanJustification": false,
+      "requiresEvidence": false,
+      "requiresNetwork": false,
+      "examples": [
+        "clean up PR body",
+        "rewrite README section"
+      ]
+    },
+    {
+      "taskClass": "log-triage",
+      "description": "Trim and classify logs before deeper debugging.",
+      "defaultLane": "local-cheap",
+      "allowedEscalationLanes": [
+        "cheap",
+        "standard"
+      ],
+      "requiresHumanJustification": false,
+      "requiresEvidence": true,
+      "requiresNetwork": false,
+      "examples": [
+        "summarize failing test output",
+        "identify likely stack trace frame"
+      ]
+    },
+    {
+      "taskClass": "routine-code",
+      "description": "Repo-local edits, tests, docs, and straightforward debugging.",
+      "defaultLane": "standard",
+      "allowedEscalationLanes": [
+        "high-end"
+      ],
+      "requiresHumanJustification": false,
+      "requiresEvidence": true,
+      "requiresNetwork": false,
+      "examples": [
+        "implement a schema validator",
+        "fix a known failing unit test"
+      ]
+    },
+    {
+      "taskClass": "architecture-decision",
+      "description": "Selection of durable architecture, trust boundary, or cross-repo contract.",
+      "defaultLane": "high-end",
+      "allowedEscalationLanes": [
+        "pro"
+      ],
+      "requiresHumanJustification": true,
+      "requiresEvidence": true,
+      "requiresNetwork": false,
+      "examples": [
+        "choose enforcement boundary between model-router and guardrail-fabric",
+        "define irreversible API contract"
+      ]
+    },
+    {
+      "taskClass": "hard-debugging",
+      "description": "Repeated failure or uncertain root cause after standard-lane attempts.",
+      "defaultLane": "high-end",
+      "allowedEscalationLanes": [
+        "pro"
+      ],
+      "requiresHumanJustification": true,
+      "requiresEvidence": true,
+      "requiresNetwork": false,
+      "examples": [
+        "three failed CI attempts with unclear cause",
+        "race condition or nondeterministic runtime behavior"
+      ]
+    },
+    {
+      "taskClass": "security-review",
+      "description": "Threat modeling, abuse analysis, policy bypass review, or secret/data exfiltration risk.",
+      "defaultLane": "high-end",
+      "allowedEscalationLanes": [
+        "pro"
+      ],
+      "requiresHumanJustification": true,
+      "requiresEvidence": true,
+      "requiresNetwork": false,
+      "examples": [
+        "review guardrail bypass risk",
+        "evaluate hosted prompt egress policy"
+      ]
+    },
+    {
+      "taskClass": "multi-repo-migration",
+      "description": "Coordinated change across multiple repos or organizations.",
+      "defaultLane": "high-end",
+      "allowedEscalationLanes": [
+        "pro"
+      ],
+      "requiresHumanJustification": true,
+      "requiresEvidence": true,
+      "requiresNetwork": false,
+      "examples": [
+        "coordinate AgentPlane and Policy Fabric contract changes",
+        "roll out route-decision receipts across repos"
+      ]
+    },
+    {
+      "taskClass": "high-stakes-synthesis",
+      "description": "Final synthesis where error has material governance, security, legal, financial, or release impact.",
+      "defaultLane": "high-end",
+      "allowedEscalationLanes": [
+        "pro"
+      ],
+      "requiresHumanJustification": true,
+      "requiresEvidence": true,
+      "requiresNetwork": true,
+      "examples": [
+        "release-blocking risk assessment",
+        "contradictory external source reconciliation"
+      ]
+    }
+  ],
+  "chainStages": [
+    {
+      "stage": "intake",
+      "defaultLane": "cheap",
+      "maxLaneWithoutEscalation": "standard",
+      "requiredEvidence": [
+        "taskClass",
+        "initialLane"
+      ]
+    },
+    {
+      "stage": "classification",
+      "defaultLane": "local-cheap",
+      "maxLaneWithoutEscalation": "cheap",
+      "requiredEvidence": [
+        "taskClass",
+        "routingReason"
+      ]
+    },
+    {
+      "stage": "retrieval",
+      "defaultLane": "no-model",
+      "maxLaneWithoutEscalation": "standard",
+      "requiredEvidence": [
+        "sources",
+        "connectorUseReason"
+      ]
+    },
+    {
+      "stage": "planning",
+      "defaultLane": "standard",
+      "maxLaneWithoutEscalation": "standard",
+      "requiredEvidence": [
+        "plan",
+        "riskClass",
+        "escalationReasonIfAny"
+      ]
+    },
+    {
+      "stage": "execution",
+      "defaultLane": "standard",
+      "maxLaneWithoutEscalation": "standard",
+      "requiredEvidence": [
+        "changedFiles",
+        "commands"
+      ]
+    },
+    {
+      "stage": "tool-use",
+      "defaultLane": "no-model",
+      "maxLaneWithoutEscalation": "standard",
+      "requiredEvidence": [
+        "toolName",
+        "actionClass",
+        "policyDecision"
+      ]
+    },
+    {
+      "stage": "verification",
+      "defaultLane": "no-model",
+      "maxLaneWithoutEscalation": "standard",
+      "requiredEvidence": [
+        "tests",
+        "linters",
+        "status"
+      ]
+    },
+    {
+      "stage": "review",
+      "defaultLane": "standard",
+      "maxLaneWithoutEscalation": "high-end",
+      "requiredEvidence": [
+        "reviewLane",
+        "riskClass",
+        "findings"
+      ]
+    },
+    {
+      "stage": "finalization",
+      "defaultLane": "cheap",
+      "maxLaneWithoutEscalation": "standard",
+      "requiredEvidence": [
+        "summary",
+        "residualRisk",
+        "nextAction"
+      ]
+    }
+  ],
+  "escalationPolicy": {
+    "allowedReasons": [
+      "architecture-decision",
+      "hard-debugging",
+      "security-review",
+      "privacy-review",
+      "multi-repo-migration",
+      "irreversible-production-decision",
+      "high-stakes-synthesis",
+      "conflicting-evidence-resolution",
+      "repeated-standard-lane-failure",
+      "release-gate-review"
+    ],
+    "requireReasonForHighEnd": true,
+    "requireReasonForPro": true,
+    "repeatedFailureThreshold": 2,
+    "deescalateAfterPlan": true,
+    "denyChattyThinkingOnHighEnd": true,
+    "budgetWindow": {
+      "unit": "task",
+      "highEndMaxShare": 0.25,
+      "proMaxShare": 0.05
+    }
+  },
+  "contextPolicy": {
+    "clearOnTaskSwitch": true,
+    "compactBeforeContextLimit": true,
+    "preferPathReferences": true,
+    "trimLogsByDefault": true,
+    "maxLogLinesWithoutApproval": 80,
+    "redactSecrets": true,
+    "disableNoncriticalConnectorsByDefault": true,
+    "promptStorage": "hash-only"
+  },
+  "toolPolicy": {
+    "toolsOffUnlessNeeded": true,
+    "networkToolsRequireReason": true,
+    "writeToolsRequireEvidence": true,
+    "repoMutationRequiresBranchOrExplicitDirectCommit": true,
+    "mechanicalVerificationRequired": true
+  },
+  "evidence": {
+    "emitRouteDecision": true,
+    "emitEscalationReceipt": true,
+    "emitCostClass": true,
+    "emitContextPolicy": true,
+    "emitToolPolicy": true,
+    "promptHashOnly": true,
+    "ledgerRefs": [
+      "SocioProphet/model-governance-ledger",
+      "SocioProphet/agentplane",
+      "SocioProphet/guardrail-fabric"
+    ]
+  },
+  "enforcement": {
+    "decisionAbi": "sourceos.guardrail.decision.v0.1",
+    "onViolation": "defer",
+    "denyHighEndWithoutReason": true,
+    "denyProWithoutReason": true,
+    "downgradePreferred": true,
+    "routeDecisionRequiredBeforeExecution": true
+  }
+}
