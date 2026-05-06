@@ -1,0 +1,168 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.socioprophet.ai/model-router/agent-execution-budget-resource-optimizer.schema.json",
+  "title": "AgentExecutionBudgetResourceOptimizer",
+  "description": "Companion contract for optimizing agent model-lane selection by budget, quota, latency, quality floor, privacy, local resource availability, and provider health.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "optimizerId",
+    "policyRef",
+    "objective",
+    "budgetPolicy",
+    "resourcePolicy",
+    "qualityPolicy",
+    "selectionPolicy",
+    "evidence",
+    "enforcement"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "v0.1" },
+    "kind": { "const": "AgentExecutionBudgetResourceOptimizer" },
+    "optimizerId": { "type": "string", "pattern": "^urn:socioprophet:model-routing-optimizer:" },
+    "policyRef": { "type": "string", "pattern": "^urn:socioprophet:model-routing-policy:" },
+    "objective": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["primary", "orderedPreferences"],
+      "properties": {
+        "primary": {
+          "type": "string",
+          "enum": [
+            "minimize-cost-subject-to-quality-and-risk",
+            "minimize-latency-subject-to-quality-and-policy",
+            "maximize-quality-subject-to-budget-and-policy",
+            "local-first-subject-to-safety-and-quality"
+          ]
+        },
+        "orderedPreferences": {
+          "type": "array",
+          "minItems": 3,
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "budgetPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["currency", "windows", "onBudgetPressure"],
+      "properties": {
+        "currency": { "type": "string" },
+        "windows": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["window", "maxSpend", "highEndMaxShare", "proMaxShare"],
+            "properties": {
+              "window": { "type": "string", "enum": ["task", "session", "day", "week", "month"] },
+              "maxSpend": { "type": "number", "minimum": 0 },
+              "highEndMaxShare": { "type": "number", "minimum": 0, "maximum": 1 },
+              "proMaxShare": { "type": "number", "minimum": 0, "maximum": 1 }
+            }
+          }
+        },
+        "premiumReserveShare": { "type": "number", "minimum": 0, "maximum": 1 },
+        "onBudgetPressure": { "type": "string", "enum": ["downgrade", "defer", "deny", "require-human-approval"] }
+      }
+    },
+    "resourcePolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["requiredSignals", "localAdmission", "hostedAdmission"],
+      "properties": {
+        "requiredSignals": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string" }
+        },
+        "localAdmission": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["preferWhenAvailable", "denyWhenThermalCritical", "denyWhenBatteryCritical", "minMemoryAvailableBytes"],
+          "properties": {
+            "preferWhenAvailable": { "type": "boolean" },
+            "denyWhenThermalCritical": { "type": "boolean" },
+            "denyWhenBatteryCritical": { "type": "boolean" },
+            "minMemoryAvailableBytes": { "type": "integer", "minimum": 0 },
+            "allowedProfileRefs": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "hostedAdmission": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["requiresPolicy", "requiresNetwork", "denyWhenQuotaUnknown", "denyWhenProviderUnhealthy"],
+          "properties": {
+            "requiresPolicy": { "type": "boolean" },
+            "requiresNetwork": { "type": "boolean" },
+            "denyWhenQuotaUnknown": { "type": "boolean" },
+            "denyWhenProviderUnhealthy": { "type": "boolean" },
+            "maxProviderLatencyP95Ms": { "type": "integer", "minimum": 1 },
+            "maxProviderErrorRate": { "type": "number", "minimum": 0, "maximum": 1 }
+          }
+        }
+      }
+    },
+    "qualityPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["riskFloors", "onQualityUncertain"],
+      "properties": {
+        "riskFloors": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["riskClass", "minimumLane", "requiresVerification"],
+            "properties": {
+              "riskClass": { "type": "string", "enum": ["low", "medium", "high", "critical"] },
+              "minimumLane": { "type": "string", "enum": ["no-model", "local-cheap", "cheap", "standard", "high-end", "pro"] },
+              "requiresVerification": { "type": "boolean" }
+            }
+          }
+        },
+        "onQualityUncertain": { "type": "string", "enum": ["ask-standard-review", "escalate-with-reason", "defer", "deny"] }
+      }
+    },
+    "selectionPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["candidateOrder", "tieBreakers", "estimateBeforeRoute", "neverSilentlyUpgrade"],
+      "properties": {
+        "candidateOrder": { "type": "array", "minItems": 3, "items": { "type": "string" } },
+        "tieBreakers": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+        "estimateBeforeRoute": { "type": "boolean" },
+        "neverSilentlyUpgrade": { "type": "boolean" }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["emitBudgetDecision", "emitResourceSnapshot", "emitQuotaSnapshot", "emitCandidateSet", "emitSelectedCandidate", "promptHashOnly"],
+      "properties": {
+        "emitBudgetDecision": { "type": "boolean" },
+        "emitResourceSnapshot": { "type": "boolean" },
+        "emitQuotaSnapshot": { "type": "boolean" },
+        "emitCandidateSet": { "type": "boolean" },
+        "emitSelectedCandidate": { "type": "boolean" },
+        "promptHashOnly": { "type": "boolean" }
+      }
+    },
+    "enforcement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["decisionAbi", "failClosedOnMissingSignals", "denyOnBudgetExhausted", "denyOnUnknownQuotaForPremium", "routeBeforeExecution"],
+      "properties": {
+        "decisionAbi": { "type": "string" },
+        "failClosedOnMissingSignals": { "type": "boolean" },
+        "denyOnBudgetExhausted": { "type": "boolean" },
+        "denyOnUnknownQuotaForPremium": { "type": "boolean" },
+        "routeBeforeExecution": { "type": "boolean" }
+      }
+    }
+  }
+}
