@@ -42,6 +42,19 @@ tools/validate_agent_execution_model_routing_policies.py
 docs/agent-execution-model-routing-policy.md
 ```
 
+## Budget and resource optimizer
+
+Routing is also constrained by budget and live resource availability. The optimizer chooses the cheapest acceptable lane subject to policy, privacy, safety, quality floor, budget ceilings, local resource health, provider quota, provider health, latency, and deterministic verification availability.
+
+Contract and example:
+
+```text
+schemas/agent-execution-budget-resource-optimizer.schema.json
+examples/agent-execution-budget-resource-optimizer.default.json
+tools/validate_agent_execution_budget_resource_optimizers.py
+docs/budget-resource-optimizer.md
+```
+
 ## Default local posture
 
 The first SourceOS local profiles are:
@@ -62,24 +75,29 @@ The 1B profile is the laptop-safe router/triage/summarization default. The 3B pr
 - High-end/pro agent execution lanes are denied unless an allowed escalation reason and receipt exist.
 - Routine execution de-escalates to standard or cheaper lanes after planning.
 - Verification defaults to deterministic tools rather than another expensive model call.
-- Evidence records route decisions, escalation receipts, runtime health, cost class, context policy, tool policy, and governance references.
+- Budget, quota, resource, latency, and provider-health constraints are evaluated before route execution.
+- Missing required optimizer signals fail closed.
+- Unknown premium quota denies high-end/pro use.
+- Exhausted budget denies or downgrades according to policy rather than silently overrunning.
+- Evidence records route decisions, escalation receipts, budget decisions, resource snapshots, quota snapshots, candidate sets, runtime health, cost class, context policy, tool policy, and governance references.
 - Prompt evidence should be hash-only by default.
 
 ## Boundary
 
 | Repo | Responsibility |
 |---|---|
-| `SourceOS-Linux/sourceos-model-carry` | Local model profiles and service refs. |
-| `SocioProphet/model-governance-ledger` | Per-user consent, data boundary, evaluation, promotion, revocation, and model-routing escalation receipts. |
+| `SourceOS-Linux/sourceos-model-carry` | Local model profiles, service refs, local resource posture, and evidence collectors. |
+| `SocioProphet/model-governance-ledger` | Per-user consent, data boundary, evaluation, promotion, revocation, model-routing escalation receipts, cost-class evidence, and budget/resource audit trails. |
 | `SociOS-Linux/socios` | Opt-in orchestration for personalization workflows. |
-| `SocioProphet/model-router` | Runtime route binding, agent execution model-routing policy, and policy-aware target selection. |
+| `SocioProphet/model-router` | Runtime route binding, agent execution model-routing policy, budget/resource optimization, and policy-aware target selection. |
 | `SocioProphet/agentplane` | Execution-chain evidence and run/replay artifacts for routed agent work. |
-| `SocioProphet/guardrail-fabric` | Fail-closed policy decisions for tool hooks, model-lane escalation, and write/network gates. |
-| `SocioProphet/policy-fabric` | Policy packaging, inheritance, validation, and release review. |
+| `SocioProphet/guardrail-fabric` | Fail-closed policy decisions for tool hooks, model-lane escalation, budget/resource constraints, and write/network gates. |
+| `SocioProphet/policy-fabric` | Policy packaging, inheritance, validation, release review, and budget/resource constraint governance. |
 
 ## Validation
 
 ```bash
 python3 tools/validate_local_personal_route_bindings.py
 python3 tools/validate_agent_execution_model_routing_policies.py
+python3 tools/validate_agent_execution_budget_resource_optimizers.py
 ```
