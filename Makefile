@@ -1,7 +1,10 @@
-.PHONY: validate test emit-demo-decision release-dry-run
+.PHONY: validate test emit-demo-decision release-dry-run validate-superconscious-reasoning-route
 
-validate:
+validate: validate-superconscious-reasoning-route
 	python3 tools/validate_route_examples.py
+
+validate-superconscious-reasoning-route:
+	python3 tools/validate_superconscious_reasoning_route.py
 
 test:
 	python3 -m pytest -q tools/tests
