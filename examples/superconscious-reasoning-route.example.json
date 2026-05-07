@@ -1,0 +1,28 @@
+{
+  "apiVersion": "modelrouter.socioprophet.dev/v1",
+  "kind": "SuperconsciousReasoningRoute",
+  "metadata": {
+    "name": "superconscious-m1-deterministic-route",
+    "createdAt": "2026-05-06T00:00:00Z"
+  },
+  "spec": {
+    "reasoningRunRef": "urn:srcos:reasoning-run:superconscious-demo",
+    "taskClass": "reference-loop-demo",
+    "localFirst": true,
+    "promptEgress": "denied",
+    "privacyMode": "local-only",
+    "policyRef": "urn:socioprophet:guardrail-policy:superconscious-m1-deterministic",
+    "sourceosModelCarryRefs": [
+      "urn:srcos:local-model-profile:llama32-1b",
+      "urn:srcos:local-model-profile:llama32-3b"
+    ],
+    "routeDecision": {
+      "routeId": "urn:srcos:model-route:deterministic-stub",
+      "decision": "deterministic-stub-route",
+      "providerClass": "none",
+      "modelCalls": "none",
+      "promptEgress": "denied",
+      "evidenceRef": "urn:srcos:reasoning-event:superconscious-model-route"
+    }
+  }
+}
