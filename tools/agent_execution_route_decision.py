@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """Emit an agent execution model-route decision.
 
-This executable slice combines two contracts:
+This executable slice combines three contracts:
 
 - AgentExecutionModelRoutingPolicy: which lanes are allowed.
 - AgentExecutionBudgetResourceOptimizer: which allowed lane is optimal now.
+- ModelPriceCatalog: how lane cost is estimated without hard-coded prices.
 
 The router chooses the cheapest feasible lane that satisfies policy, quality,
 budget, resource, quota, and provider-health constraints. It never silently
@@ -25,6 +26,7 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_POLICY = ROOT / "examples/agent-execution-model-routing-policy.default.json"
 DEFAULT_OPTIMIZER = ROOT / "examples/agent-execution-budget-resource-optimizer.default.json"
+DEFAULT_PRICE_CATALOG = ROOT / "examples/model-price-catalog.demo.json"
 
 LANE_RANK = {
     "no-model": 0,
@@ -42,15 +44,6 @@ LANE_COST_CLASS = {
     "standard": "medium",
     "high-end": "high",
     "pro": "maximum",
-}
-
-DEFAULT_COST_ESTIMATE = {
-    "no-model": 0.0,
-    "local-cheap": 0.001,
-    "cheap": 0.02,
-    "standard": 0.15,
-    "high-end": 1.0,
-    "pro": 2.0,
 }
 
 REQUIRED_RESOURCE_SIGNALS = [
@@ -134,17 +127,83 @@ def stage_policy(policy: dict[str, Any], stage: str) -> dict[str, Any]:
         raise RouteDecisionError(f"unknown stage: {stage}") from exc
 
 
-def lane_cost(policy: dict[str, Any], lane: str, resources: dict[str, Any]) -> float:
+def price_catalog_lane(price_catalog: dict[str, Any], lane: str) -> dict[str, Any]:
+    lanes = by_key(price_catalog.get("lanes", []), "laneId")
+    try:
+        return lanes[lane]
+    except KeyError as exc:
+        raise RouteDecisionError(f"price catalog missing lane: {lane}") from exc
+
+
+def selected_price_profile(price_catalog: dict[str, Any], resources: dict[str, Any], lane: str) -> dict[str, Any]:
+    lane_doc = price_catalog_lane(price_catalog, lane)
+    profiles = by_key(lane_doc.get("profiles", []), "profileRef")
+    requested_profiles = resources.get("selectedPriceProfiles", {})
+    if isinstance(requested_profiles, dict) and lane in requested_profiles:
+        profile_ref = str(requested_profiles[lane])
+    else:
+        profile_ref = str(lane_doc.get("defaultProfileRef"))
+    try:
+        profile = profiles[profile_ref]
+    except KeyError as exc:
+        raise RouteDecisionError(f"price catalog missing profile {profile_ref} for lane {lane}") from exc
+    return {"lane": lane_doc, "profile": profile}
+
+
+def estimate_lane_cost(price_catalog: dict[str, Any], lane: str, resources: dict[str, Any]) -> dict[str, Any]:
     override = resources.get("estimatedLaneCosts", {})
+    profile_bundle = selected_price_profile(price_catalog, resources, lane)
+    lane_doc = profile_bundle["lane"]
+    profile = profile_bundle["profile"]
+    profile_ref = str(profile["profileRef"])
+
     if isinstance(override, dict) and lane in override:
-        return float(override[lane])
-    tokens = float(resources.get("estimatedInputTokens", 0)) + float(resources.get("estimatedOutputTokens", 0))
-    base = DEFAULT_COST_ESTIMATE[lane]
-    if lane in {"cheap", "standard", "high-end", "pro"} and tokens > 0:
-        # Conservative placeholder until provider-specific price tables land.
-        multiplier = {"cheap": 0.0000002, "standard": 0.000001, "high-end": 0.000006, "pro": 0.000012}[lane]
-        return round(max(base, tokens * multiplier), 6)
-    return base
+        return {
+            "amount": float(override[lane]),
+            "catalogId": price_catalog.get("catalogId"),
+            "profileRef": profile_ref,
+            "costModel": lane_doc.get("costModel"),
+            "source": "resource-override",
+        }
+
+    pricing = profile.get("pricing", {})
+    input_tokens = float(resources.get("estimatedInputTokens", 0))
+    output_tokens = float(resources.get("estimatedOutputTokens", 0))
+    cache_read_tokens = float(resources.get("estimatedCacheReadTokens", 0))
+    tool_calls = float(resources.get("estimatedToolCalls", 0))
+    runtime_minutes = float(resources.get("estimatedRuntimeMinutes", 1))
+
+    cost_model = lane_doc.get("costModel")
+    if cost_model == "none":
+        amount = 0.0
+    elif cost_model == "local-runtime":
+        amount = (
+            float(pricing.get("requestBaseCost", 0))
+            + runtime_minutes * float(pricing.get("localRuntimeCostPerMinute", 0))
+            + runtime_minutes * float(pricing.get("localEnergyCostPerMinute", 0))
+            + tool_calls * float(pricing.get("toolCallCost", 0))
+        )
+    elif cost_model == "hosted-token":
+        amount = (
+            float(pricing.get("requestBaseCost", 0))
+            + (input_tokens / 1_000_000.0) * float(pricing.get("inputPerMillion", 0))
+            + (output_tokens / 1_000_000.0) * float(pricing.get("outputPerMillion", 0))
+            + (cache_read_tokens / 1_000_000.0) * float(pricing.get("cacheReadPerMillion", 0))
+            + tool_calls * float(pricing.get("toolCallCost", 0))
+        )
+    else:
+        raise RouteDecisionError(f"unsupported costModel for lane {lane}: {cost_model}")
+
+    amount = max(float(pricing.get("minCost", 0)), amount)
+    return {
+        "amount": round(amount, 8),
+        "catalogId": price_catalog.get("catalogId"),
+        "profileRef": profile_ref,
+        "providerRef": profile.get("providerRef"),
+        "modelRef": profile.get("modelRef"),
+        "costModel": cost_model,
+        "source": "price-catalog",
+    }
 
 
 def budget_window(optimizer: dict[str, Any], window_name: str) -> dict[str, Any]:
@@ -160,6 +219,7 @@ def lane_feasibility(
     lane: str,
     policy: dict[str, Any],
     optimizer: dict[str, Any],
+    price_catalog: dict[str, Any],
     task: dict[str, Any],
     stage: dict[str, Any],
     quality_floor: dict[str, Any],
@@ -239,8 +299,8 @@ def lane_feasibility(
             feasible = False
             reasons.append("premium-reserve-below-threshold")
 
-    cost = lane_cost(policy, lane, resources)
-    if cost > budget_remaining:
+    cost = estimate_lane_cost(price_catalog, lane, resources)
+    if cost["amount"] > budget_remaining:
         feasible = False
         reasons.append("budget-insufficient")
 
@@ -257,7 +317,11 @@ def lane_feasibility(
     return {
         "lane": lane,
         "feasible": feasible,
-        "estimatedCost": cost,
+        "estimatedCost": cost["amount"],
+        "priceProfileRef": cost.get("profileRef"),
+        "priceCatalogId": cost.get("catalogId"),
+        "costModel": cost.get("costModel"),
+        "costSource": cost.get("source"),
         "reasons": reasons,
     }
 
@@ -271,6 +335,7 @@ def make_decision(
     *,
     policy: dict[str, Any],
     optimizer: dict[str, Any],
+    price_catalog: dict[str, Any],
     resources: dict[str, Any],
     task_class: str,
     stage_name: str,
@@ -296,6 +361,7 @@ def make_decision(
             lane=lane,
             policy=policy,
             optimizer=optimizer,
+            price_catalog=price_catalog,
             task=task,
             stage=stage,
             quality_floor=floor,
@@ -316,6 +382,7 @@ def make_decision(
             lane=requested_lane,
             policy=policy,
             optimizer=optimizer,
+            price_catalog=price_catalog,
             task=task,
             stage=stage,
             quality_floor=floor,
@@ -333,11 +400,15 @@ def make_decision(
         reason = "no-feasible-candidate"
         selected_cost = None
         cost_class = None
+        price_profile_ref = None
+        cost_model = None
     else:
         selected = feasible_candidates[0]
         selected_lane = str(selected["lane"])
         selected_cost = float(selected["estimatedCost"])
         cost_class = LANE_COST_CLASS[selected_lane]
+        price_profile_ref = selected.get("priceProfileRef")
+        cost_model = selected.get("costModel")
         if requested_lane and selected_lane != requested_lane:
             status = "downgraded" if LANE_RANK[selected_lane] < LANE_RANK[requested_lane] else "selected"
             reason = f"requested-lane-not-optimal-or-feasible:{requested_lane}"
@@ -366,6 +437,8 @@ def make_decision(
             "reason": reason,
             "costClass": cost_class,
             "estimatedCost": selected_cost,
+            "priceProfileRef": price_profile_ref,
+            "costModel": cost_model,
         },
         "quality": {
             "minimumLane": floor["minimumLane"],
@@ -377,7 +450,7 @@ def make_decision(
             "onBudgetPressure": optimizer.get("budgetPolicy", {}).get("onBudgetPressure"),
             "premiumReserveShare": optimizer.get("budgetPolicy", {}).get("premiumReserveShare"),
         },
-        "resources": {key: resources[key] for key in sorted(resources) if key != "estimatedLaneCosts"},
+        "resources": {key: resources[key] for key in sorted(resources) if key not in {"estimatedLaneCosts", "selectedPriceProfiles"}},
         "requestedEvaluation": requested_evaluation,
         "candidateSet": candidates,
         "evidence": {
@@ -387,6 +460,8 @@ def make_decision(
             "emitQuotaSnapshot": optimizer.get("evidence", {}).get("emitQuotaSnapshot") is True,
             "emitCandidateSet": optimizer.get("evidence", {}).get("emitCandidateSet") is True,
             "emitSelectedCandidate": optimizer.get("evidence", {}).get("emitSelectedCandidate") is True,
+            "priceCatalogId": price_catalog.get("catalogId"),
+            "priceCatalogEffectiveAt": price_catalog.get("effectiveAt"),
             "promptEvidenceMode": "hash-only",
             "decisionAbi": optimizer.get("enforcement", {}).get("decisionAbi", "sourceos.guardrail.decision.v0.1"),
         },
@@ -399,6 +474,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Emit an AgentExecutionRouteDecision JSON document.")
     parser.add_argument("--policy", type=Path, default=DEFAULT_POLICY)
     parser.add_argument("--optimizer", type=Path, default=DEFAULT_OPTIMIZER)
+    parser.add_argument("--price-catalog", type=Path, default=DEFAULT_PRICE_CATALOG)
     parser.add_argument("--resources", type=Path, required=True)
     parser.add_argument("--task-class", required=True)
     parser.add_argument("--stage", required=True)
@@ -417,6 +493,7 @@ def main(argv: list[str] | None = None) -> int:
         decision = make_decision(
             policy=load_json(args.policy),
             optimizer=load_json(args.optimizer),
+            price_catalog=load_json(args.price_catalog),
             resources=load_json(args.resources),
             task_class=args.task_class,
             stage_name=args.stage,
