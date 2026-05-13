@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.socioprophet.ai/model-router/model-price-catalog.schema.json",
+  "title": "ModelPriceCatalog",
+  "description": "Governed model pricing catalog used by model-router cost estimation. Values are configuration, not source-code constants.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "kind", "catalogId", "currency", "effectiveAt", "lanes"],
+  "properties": {
+    "schemaVersion": { "const": "v0.1" },
+    "kind": { "const": "ModelPriceCatalog" },
+    "catalogId": { "type": "string", "pattern": "^urn:socioprophet:model-price-catalog:" },
+    "currency": { "type": "string" },
+    "effectiveAt": { "type": "string" },
+    "notes": { "type": "string" },
+    "lanes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["laneId", "costModel", "defaultProfileRef", "profiles"],
+        "properties": {
+          "laneId": { "type": "string", "enum": ["no-model", "local-cheap", "cheap", "standard", "high-end", "pro"] },
+          "costModel": { "type": "string", "enum": ["none", "local-runtime", "hosted-token"] },
+          "defaultProfileRef": { "type": "string" },
+          "profiles": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["profileRef", "pricing"],
+              "properties": {
+                "profileRef": { "type": "string" },
+                "providerRef": { "type": "string" },
+                "modelRef": { "type": "string" },
+                "pricing": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["requestBaseCost", "inputPerMillion", "outputPerMillion", "minCost"],
+                  "properties": {
+                    "requestBaseCost": { "type": "number", "minimum": 0 },
+                    "inputPerMillion": { "type": "number", "minimum": 0 },
+                    "outputPerMillion": { "type": "number", "minimum": 0 },
+                    "cacheReadPerMillion": { "type": "number", "minimum": 0 },
+                    "toolCallCost": { "type": "number", "minimum": 0 },
+                    "localRuntimeCostPerMinute": { "type": "number", "minimum": 0 },
+                    "localEnergyCostPerMinute": { "type": "number", "minimum": 0 },
+                    "minCost": { "type": "number", "minimum": 0 }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
