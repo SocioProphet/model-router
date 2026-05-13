@@ -1,0 +1,14 @@
+{
+  "localModelProfileAvailable": true,
+  "localServiceHealthy": true,
+  "batteryState": "normal",
+  "thermalState": "normal",
+  "memoryAvailableBytes": 17179869184,
+  "networkAvailable": true,
+  "providerQuotaKnown": false,
+  "providerQuotaRemainingShare": -1.0,
+  "providerErrorRate": 0.001,
+  "providerLatencyP95Ms": 1200,
+  "estimatedInputTokens": 1200,
+  "estimatedOutputTokens": 400
+}
