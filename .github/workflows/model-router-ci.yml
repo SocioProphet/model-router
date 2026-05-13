@@ -1,0 +1,37 @@
+name: model-router-ci
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install test runner
+        run: python -m pip install --upgrade pip pytest
+
+      - name: Validate local personal route bindings
+        run: python3 tools/validate_local_personal_route_bindings.py
+
+      - name: Validate agent execution routing policies
+        run: python3 tools/validate_agent_execution_model_routing_policies.py
+
+      - name: Validate budget/resource optimizer policies
+        run: python3 tools/validate_agent_execution_budget_resource_optimizers.py
+
+      - name: Validate model price catalogs
+        run: python3 tools/validate_model_price_catalogs.py
+
+      - name: Test route decisions
+        run: pytest -q tests/test_agent_execution_route_decision.py
