@@ -70,6 +70,46 @@ Tools are not free. Network tools, connector tools, and repository write tools m
 - repo mutation requires a branch or explicit direct-commit reason
 - mechanical verification is required before an agent run is considered complete
 
+## Executable route-decision slice
+
+The repository now includes an executable route-decision CLI:
+
+```text
+tools/agent_execution_route_decision.py
+schemas/agent-execution-route-decision.schema.json
+```
+
+The CLI combines:
+
+- `AgentExecutionModelRoutingPolicy`
+- `AgentExecutionBudgetResourceOptimizer`
+
+into a normalized `AgentExecutionRouteDecision`.
+
+### Example
+
+```bash
+python3 tools/agent_execution_route_decision.py \
+  --resources examples/resources.healthy-local.json \
+  --task-class architecture-decision \
+  --stage planning \
+  --risk-class high \
+  --requested-lane high-end \
+  --escalation-reason architecture-decision
+```
+
+### Decision behavior
+
+The executable slice currently proves these invariants:
+
+- formatting requests downgrade away from high-end
+- architecture decisions may use high-end with valid escalation reason
+- pro lanes without reason are deferred
+- budget pressure downgrades routine premium requests
+- thermal-critical local systems deny local admission
+- unknown premium quota blocks premium lanes
+- no silent lane upgrade is allowed
+
 ## Enforcement boundary
 
 This repo owns the model-routing policy contract. Enforcement is expected across:
@@ -88,12 +128,17 @@ The machine-readable policy is defined here:
 schemas/agent-execution-model-routing-policy.schema.json
 examples/agent-execution-model-routing-policy.default.json
 tools/validate_agent_execution_model_routing_policies.py
+schemas/agent-execution-budget-resource-optimizer.schema.json
+examples/agent-execution-budget-resource-optimizer.default.json
+tools/validate_agent_execution_budget_resource_optimizers.py
 ```
 
 Validate it with:
 
 ```bash
 python3 tools/validate_agent_execution_model_routing_policies.py
+python3 tools/validate_agent_execution_budget_resource_optimizers.py
+pytest -q tests/test_agent_execution_route_decision.py
 ```
 
 ## Non-negotiables
@@ -105,3 +150,6 @@ python3 tools/validate_agent_execution_model_routing_policies.py
 5. Every high-end/pro route emits escalation evidence.
 6. Prompt evidence is hash-only by default.
 7. After a high-end plan is produced, execution de-escalates by default.
+8. Missing optimizer signals fail closed.
+9. Unknown premium quota denies premium lanes.
+10. The optimizer never silently upgrades to a more expensive lane.
