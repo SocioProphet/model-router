@@ -1,0 +1,132 @@
+{
+  "schemaVersion": "v0.1",
+  "kind": "ModelPriceCatalog",
+  "catalogId": "urn:socioprophet:model-price-catalog:demo",
+  "currency": "USD",
+  "effectiveAt": "2026-05-13T00:00:00Z",
+  "notes": "Demo pricing catalog for route-decision tests. Production catalogs must be generated from approved provider pricing sources and governance review.",
+  "lanes": [
+    {
+      "laneId": "no-model",
+      "costModel": "none",
+      "defaultProfileRef": "urn:socioprophet:model-price-profile:no-model",
+      "profiles": [
+        {
+          "profileRef": "urn:socioprophet:model-price-profile:no-model",
+          "providerRef": "local-tools",
+          "modelRef": "deterministic-tools",
+          "pricing": {
+            "requestBaseCost": 0,
+            "inputPerMillion": 0,
+            "outputPerMillion": 0,
+            "cacheReadPerMillion": 0,
+            "toolCallCost": 0,
+            "minCost": 0
+          }
+        }
+      ]
+    },
+    {
+      "laneId": "local-cheap",
+      "costModel": "local-runtime",
+      "defaultProfileRef": "urn:socioprophet:model-price-profile:local-cheap-demo",
+      "profiles": [
+        {
+          "profileRef": "urn:socioprophet:model-price-profile:local-cheap-demo",
+          "providerRef": "SourceOS Local Model Door",
+          "modelRef": "urn:srcos:model-profile:local-llama32-1b",
+          "pricing": {
+            "requestBaseCost": 0.0001,
+            "inputPerMillion": 0,
+            "outputPerMillion": 0,
+            "cacheReadPerMillion": 0,
+            "toolCallCost": 0,
+            "localRuntimeCostPerMinute": 0.001,
+            "localEnergyCostPerMinute": 0.0005,
+            "minCost": 0.0005
+          }
+        }
+      ]
+    },
+    {
+      "laneId": "cheap",
+      "costModel": "hosted-token",
+      "defaultProfileRef": "urn:socioprophet:model-price-profile:cheap-demo",
+      "profiles": [
+        {
+          "profileRef": "urn:socioprophet:model-price-profile:cheap-demo",
+          "providerRef": "hosted-cheap-provider",
+          "modelRef": "cheap-class-model",
+          "pricing": {
+            "requestBaseCost": 0.001,
+            "inputPerMillion": 0.15,
+            "outputPerMillion": 0.6,
+            "cacheReadPerMillion": 0.03,
+            "toolCallCost": 0.002,
+            "minCost": 0.002
+          }
+        }
+      ]
+    },
+    {
+      "laneId": "standard",
+      "costModel": "hosted-token",
+      "defaultProfileRef": "urn:socioprophet:model-price-profile:standard-demo",
+      "profiles": [
+        {
+          "profileRef": "urn:socioprophet:model-price-profile:standard-demo",
+          "providerRef": "hosted-standard-provider",
+          "modelRef": "standard-class-model",
+          "pricing": {
+            "requestBaseCost": 0.005,
+            "inputPerMillion": 1.0,
+            "outputPerMillion": 4.0,
+            "cacheReadPerMillion": 0.25,
+            "toolCallCost": 0.01,
+            "minCost": 0.02
+          }
+        }
+      ]
+    },
+    {
+      "laneId": "high-end",
+      "costModel": "hosted-token",
+      "defaultProfileRef": "urn:socioprophet:model-price-profile:high-end-demo",
+      "profiles": [
+        {
+          "profileRef": "urn:socioprophet:model-price-profile:high-end-demo",
+          "providerRef": "hosted-high-end-provider",
+          "modelRef": "high-end-class-model",
+          "pricing": {
+            "requestBaseCost": 0.05,
+            "inputPerMillion": 10.0,
+            "outputPerMillion": 40.0,
+            "cacheReadPerMillion": 2.5,
+            "toolCallCost": 0.05,
+            "minCost": 0.25
+          }
+        }
+      ]
+    },
+    {
+      "laneId": "pro",
+      "costModel": "hosted-token",
+      "defaultProfileRef": "urn:socioprophet:model-price-profile:pro-demo",
+      "profiles": [
+        {
+          "profileRef": "urn:socioprophet:model-price-profile:pro-demo",
+          "providerRef": "hosted-pro-provider",
+          "modelRef": "pro-class-model",
+          "pricing": {
+            "requestBaseCost": 0.1,
+            "inputPerMillion": 20.0,
+            "outputPerMillion": 80.0,
+            "cacheReadPerMillion": 5.0,
+            "toolCallCost": 0.1,
+            "minCost": 0.5
+          }
+        }
+      ]
+    }
+  ]
+}
