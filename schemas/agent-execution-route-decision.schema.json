@@ -1,0 +1,152 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.socioprophet.ai/model-router/agent-execution-route-decision.schema.json",
+  "title": "AgentExecutionRouteDecision",
+  "description": "Normalized route decision emitted by the model-router for an agent execution-chain stage after model-policy and budget/resource optimization.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "kind",
+    "decisionId",
+    "createdAt",
+    "policyRef",
+    "optimizerRef",
+    "input",
+    "selected",
+    "quality",
+    "budget",
+    "resources",
+    "candidateSet",
+    "evidence"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "v0.1" },
+    "kind": { "const": "AgentExecutionRouteDecision" },
+    "decisionId": { "type": "string" },
+    "createdAt": { "type": "string" },
+    "policyRef": { "type": "string" },
+    "optimizerRef": { "type": "string" },
+    "input": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "taskClass",
+        "stage",
+        "riskClass",
+        "requestedLane",
+        "escalationReason",
+        "budgetWindow",
+        "budgetRemaining"
+      ],
+      "properties": {
+        "taskClass": { "type": "string" },
+        "stage": { "type": "string" },
+        "riskClass": { "type": "string" },
+        "requestedLane": { "type": ["string", "null"] },
+        "escalationReason": { "type": ["string", "null"] },
+        "budgetWindow": { "type": "string" },
+        "budgetRemaining": { "type": "number" }
+      }
+    },
+    "selected": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["lane", "status", "reason", "costClass", "estimatedCost"],
+      "properties": {
+        "lane": { "type": ["string", "null"] },
+        "status": { "type": "string", "enum": ["selected", "downgraded", "deferred", "denied"] },
+        "reason": { "type": "string" },
+        "costClass": { "type": ["string", "null"] },
+        "estimatedCost": { "type": ["number", "null"] }
+      }
+    },
+    "quality": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["minimumLane", "requiresVerification"],
+      "properties": {
+        "minimumLane": { "type": "string" },
+        "requiresVerification": { "type": "boolean" }
+      }
+    },
+    "budget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["window", "remaining", "onBudgetPressure", "premiumReserveShare"],
+      "properties": {
+        "window": { "type": "string" },
+        "remaining": { "type": "number" },
+        "onBudgetPressure": { "type": "string" },
+        "premiumReserveShare": { "type": "number" }
+      }
+    },
+    "resources": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "localModelProfileAvailable",
+        "localServiceHealthy",
+        "batteryState",
+        "thermalState",
+        "memoryAvailableBytes",
+        "networkAvailable",
+        "providerQuotaKnown",
+        "providerQuotaRemainingShare",
+        "providerErrorRate",
+        "providerLatencyP95Ms",
+        "estimatedInputTokens",
+        "estimatedOutputTokens"
+      ]
+    },
+    "requestedEvaluation": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["lane", "feasible", "reasons"],
+      "properties": {
+        "lane": { "type": "string" },
+        "feasible": { "type": "boolean" },
+        "reasons": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "candidateSet": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["lane", "feasible", "estimatedCost", "reasons"],
+        "properties": {
+          "lane": { "type": "string" },
+          "feasible": { "type": "boolean" },
+          "estimatedCost": { "type": "number" },
+          "reasons": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "emitRouteDecision",
+        "emitBudgetDecision",
+        "emitResourceSnapshot",
+        "emitQuotaSnapshot",
+        "emitCandidateSet",
+        "emitSelectedCandidate",
+        "promptEvidenceMode",
+        "decisionAbi"
+      ],
+      "properties": {
+        "emitRouteDecision": { "type": "boolean" },
+        "emitBudgetDecision": { "type": "boolean" },
+        "emitResourceSnapshot": { "type": "boolean" },
+        "emitQuotaSnapshot": { "type": "boolean" },
+        "emitCandidateSet": { "type": "boolean" },
+        "emitSelectedCandidate": { "type": "boolean" },
+        "promptEvidenceMode": { "type": "string" },
+        "decisionAbi": { "type": "string" }
+      }
+    }
+  }
+}
