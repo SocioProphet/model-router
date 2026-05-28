@@ -1,10 +1,13 @@
-.PHONY: validate test emit-demo-decision release-dry-run validate-superconscious-reasoning-route
+.PHONY: validate test emit-demo-decision release-dry-run validate-superconscious-reasoning-route validate-svf-receipt-state-routing
 
-validate: validate-superconscious-reasoning-route
+validate: validate-superconscious-reasoning-route validate-svf-receipt-state-routing
 	python3 tools/validate_route_examples.py
 
 validate-superconscious-reasoning-route:
 	python3 tools/validate_superconscious_reasoning_route.py
+
+validate-svf-receipt-state-routing:
+	python3 tools/validate_svf_receipt_state_routing.py
 
 test:
 	python3 -m pytest -q tools/tests
