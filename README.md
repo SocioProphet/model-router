@@ -55,6 +55,22 @@ tools/validate_agent_execution_budget_resource_optimizers.py
 docs/budget-resource-optimizer.md
 ```
 
+## SVF receipt-state routing consumer
+
+The router may consume Sovereign Validation Fabric validation state as an input to routing posture. It may constrain model lane, autonomy ceiling, fallback posture, and deterministic verification requirements.
+
+It does not define SVF validity, execute validations, issue or verify receipts, mutate policy, or promote advisory validation to blocking validation.
+
+Contract and example:
+
+```text
+docs/SVF_RECEIPT_STATE_CONSUMER.md
+examples/svf-receipt-state-routing-policy.default.json
+tools/validate_svf_receipt_state_routing.py
+```
+
+For `selected_missing_observation`, the router must preserve `validation_observation_missing`, deny high-end/pro escalation, require deterministic verification, and keep autonomy constrained to report-only behavior.
+
 ## Default local posture
 
 The first SourceOS local profiles are:
@@ -77,6 +93,7 @@ The 1B profile is the laptop-safe router/triage/summarization default. The 3B pr
 - Verification defaults to deterministic tools rather than another expensive model call.
 - Budget, quota, resource, latency, and provider-health constraints are evaluated before route execution.
 - Missing required optimizer signals fail closed.
+- Missing SVF validation observations constrain autonomy and premium model escalation.
 - Unknown premium quota denies high-end/pro use.
 - Exhausted budget denies or downgrades according to policy rather than silently overrunning.
 - Evidence records route decisions, escalation receipts, budget decisions, resource snapshots, quota snapshots, candidate sets, runtime health, cost class, context policy, tool policy, and governance references.
@@ -89,7 +106,7 @@ The 1B profile is the laptop-safe router/triage/summarization default. The 3B pr
 | `SourceOS-Linux/sourceos-model-carry` | Local model profiles, service refs, local resource posture, and evidence collectors. |
 | `SocioProphet/model-governance-ledger` | Per-user consent, data boundary, evaluation, promotion, revocation, model-routing escalation receipts, cost-class evidence, and budget/resource audit trails. |
 | `SociOS-Linux/socios` | Opt-in orchestration for personalization workflows. |
-| `SocioProphet/model-router` | Runtime route binding, agent execution model-routing policy, budget/resource optimization, and policy-aware target selection. |
+| `SocioProphet/model-router` | Runtime route binding, agent execution model-routing policy, budget/resource optimization, SVF receipt-state consumption, and policy-aware target selection. |
 | `SocioProphet/agentplane` | Execution-chain evidence and run/replay artifacts for routed agent work. |
 | `SocioProphet/guardrail-fabric` | Fail-closed policy decisions for tool hooks, model-lane escalation, budget/resource constraints, and write/network gates. |
 | `SocioProphet/policy-fabric` | Policy packaging, inheritance, validation, release review, and budget/resource constraint governance. |
@@ -100,4 +117,6 @@ The 1B profile is the laptop-safe router/triage/summarization default. The 3B pr
 python3 tools/validate_local_personal_route_bindings.py
 python3 tools/validate_agent_execution_model_routing_policies.py
 python3 tools/validate_agent_execution_budget_resource_optimizers.py
+python3 tools/validate_svf_receipt_state_routing.py
+make validate-svf-receipt-state-routing
 ```
