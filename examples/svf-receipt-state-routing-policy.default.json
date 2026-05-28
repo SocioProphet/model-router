@@ -1,0 +1,39 @@
+{
+  "schema_version": "1.0",
+  "policy_id": "svf:receipt-state-routing-policy:default",
+  "owner": {
+    "plane": "model-router",
+    "repo": "SocioProphet/model-router"
+  },
+  "inputs": {
+    "repo": "SocioProphet/SCOPE-D",
+    "ref": "feature/svf-contract-example",
+    "selected_plans": [
+      {
+        "plan_id": "svf:plan:scope-d.defensive-assurance-basic",
+        "mode": "advisory",
+        "required_observations": ["npm run validate:svf"]
+      }
+    ],
+    "observed_validation_commands": [],
+    "receipt_refs": [],
+    "warnings": ["validation_observation_missing"],
+    "validation_age_seconds": null,
+    "validation_status": "selected_missing_observation"
+  },
+  "routing_consequence": {
+    "autonomy_ceiling": "report_only",
+    "model_lane_ceiling": "standard",
+    "high_end_allowed": false,
+    "pro_allowed": false,
+    "deterministic_verification_required": true,
+    "fallback_posture": "local_or_cheap_advisory",
+    "must_preserve_warnings": ["validation_observation_missing"]
+  },
+  "non_claims": [
+    "Does not define SVF validity.",
+    "Does not issue or verify receipts.",
+    "Does not execute validation actions.",
+    "Does not grant agent autonomy."
+  ]
+}
