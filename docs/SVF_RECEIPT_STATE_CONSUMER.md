@@ -3,7 +3,7 @@
 Status: consumer contract doctrine  
 Plane: model-router / routing policy consumer  
 Upstream authority: SocioProphet/ProCybernetica SVF policy primitive  
-Workspace registry: SocioProphet/sociosphere SVF workspace registry
+Workspace state source: SocioProphet/sociosphere SVF workspace state readout
 
 ## Purpose
 
@@ -15,15 +15,36 @@ The model router may use validation state to choose verification depth, model la
 
 `model-router` owns runtime route binding, agent execution model-routing policy, budget/resource optimization, and policy-aware target selection. SVF receipt-state consumption fits that same boundary: route decisions may consider validation evidence, but authority remains upstream.
 
+## Sociosphere workspace-state dependency
+
+The router consumes SVF validation state from Sociosphere workspace state, not directly from raw GitHub CI status.
+
+Sociosphere owns the registry-derived state that says whether a profile is selected, which Plan applies, which repo-local validation command is expected, and whether the observation is still missing.
+
+For an applicable profile with no attached evidence, Sociosphere reports:
+
+```text
+selected_missing_observation
+```
+
+with warning:
+
+```text
+validation_observation_missing
+```
+
+The router must preserve that state as validation debt. It must not convert plan selection or CI presence into validation success unless Sociosphere state contains an observed validation command or receipt reference.
+
 ## Inputs
 
-The first receipt-state consumer may read a normalized summary with:
+The first receipt-state consumer may read a normalized Sociosphere workspace-state summary with:
 
 - repo;
 - ref;
 - selected Plan ids;
 - Plan modes;
 - required observations;
+- validation command;
 - observed validation commands;
 - receipt references;
 - missing-observation warnings;
@@ -50,13 +71,14 @@ Validation state must not:
 - execute Sociosphere runner commands;
 - certify downstream repository behavior;
 - convert advisory validation into blocking validation;
-- infer production readiness from contract validation.
+- infer production readiness from contract validation;
+- treat raw CI status as the semantic source of validation state.
 
 ## Initial statuses
 
 The first contract recognizes:
 
-- `validated` — matching observed evidence or receipt reference exists;
+- `validated` — matching observed evidence or receipt reference exists in Sociosphere state;
 - `selected_missing_observation` — a Plan was selected but no observation is attached;
 - `not_configured` — no applicable SVF profile or Plan exists;
 - `failed` — attached validation evidence reports failure;
