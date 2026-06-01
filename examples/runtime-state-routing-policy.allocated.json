@@ -1,0 +1,43 @@
+{
+  "schema_version": "1.0",
+  "policy_id": "runtime:state-routing-policy:allocated-default",
+  "owner": {
+    "plane": "model-router",
+    "repo": "SocioProphet/model-router"
+  },
+  "source": {
+    "state_authority": "Sociosphere",
+    "runtime_state": "runtime_allocated",
+    "workspace_ref": "workspace://scope-d/main",
+    "environment_profile_id": "environment-sandbox:profile:sociosphere.control-plane-readout",
+    "runtime_run_ref": "agentplane:runtime-sandbox-run:allocated:scope-d-example",
+    "environment_ref": "environment://runtime/scope-d-example/allocated",
+    "evidence_refs": [
+      "evidence://agentplane/runtime-sandbox-run/scope-d-example/allocated"
+    ],
+    "receipt_refs": [
+      "receipt://agentplane/runtime-sandbox-run/scope-d-example/allocated"
+    ],
+    "blocking_gaps": [
+      "teardown_not_complete",
+      "leak_check_not_complete"
+    ],
+    "runtime_parity_certified": false
+  },
+  "routing_consequence": {
+    "autonomy_ceiling": "human_review_required",
+    "model_lane_ceiling": "standard",
+    "high_end_allowed": false,
+    "pro_allowed": false,
+    "deterministic_verification_required": true,
+    "fallback_posture": "standard_or_cheaper_runtime_review",
+    "must_preserve_warnings": [
+      "runtime_parity_not_certified"
+    ]
+  },
+  "non_claims": [
+    "Does not certify runtime parity.",
+    "Does not allocate infrastructure.",
+    "Does not grant autonomous execution authority."
+  ]
+}
