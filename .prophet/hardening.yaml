@@ -1,0 +1,35 @@
+schema_version: effective-authority/v0.1
+repo: SocioProphet/model-router
+zone: C
+owner: Model Router runtime lane
+maturity: draft
+
+authority_classes:
+  - model_route_selection
+  - provider_selection
+  - local_remote_inference_policy
+  - cost_policy_evidence
+observation_channels:
+  - model_request
+control_channels:
+  - agent_to_agent
+egress_classes:
+  - model_request
+  - model_response
+  - metadata
+  - policy
+background_workers: []
+runtime_subjects:
+  - native_process
+connector_surfaces:
+  - model_provider
+policy_sources:
+  - repo
+  - signed_config
+  - org_policy
+  - runtime_contract
+ledger_sinks:
+  - model-governance-ledger
+  - policy-fabric
+ci_validators:
+  - effective-authority-ci
