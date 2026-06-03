@@ -1,0 +1,51 @@
+{
+  "schema_version": "0.1",
+  "decision_id": "model-router:trust-chain-route-decision:deny-production-001",
+  "decision_type": "TrustChainModelRouteDecision",
+  "request": {
+    "capability": "summarization",
+    "environment": "production",
+    "risk_tier": "regulated_enterprise",
+    "tenant_ref": "tenant://demo-bank",
+    "workspace_ref": "workspace://professional/demo-ai-ops"
+  },
+  "candidate_routes": [
+    {
+      "route_ref": "model-route://model-router/legacy-local-production",
+      "model_ref": "model://local/small-language@0.0.3",
+      "runtime_or_provider_ref": "runtime-asset://lattice-forge/legacy-python-ml@0.0.3",
+      "trust_chain_refs": {
+        "model_factsheet_ref": null,
+        "eval_receipt_ref": "eval://demo/summarization-quality@0.1.0",
+        "runtime_or_provider_admission_ref": "trust-chain:admit-artifact-response:legacy-python-ml:denied",
+        "policy_profile_ref": "policy://trust-chain/model-route/regulated-enterprise-production",
+        "guardrail_decision_ref": "guardrail:decision:trust-chain-runtime-deny-001"
+      },
+      "cost_class": "local",
+      "fallback_rank": 0
+    }
+  ],
+  "selected_route": null,
+  "decision": "deny",
+  "effects": {
+    "route_allowed": false,
+    "provider_call_allowed": false,
+    "prompt_egress_allowed": false,
+    "fallback_required": false,
+    "human_review_required": true
+  },
+  "reason": "No candidate route has complete Trust Chain evidence for regulated-enterprise production use.",
+  "remediation": [
+    {
+      "step_id": "repair-runtime-and-model-binding",
+      "authority": "SocioProphet/model-governance-ledger",
+      "required_before_route": true,
+      "instruction": "Bind model factsheet, eval receipt, runtime admission, Guardrail decision, and AgentPlane validation before routing."
+    }
+  ],
+  "non_claims": [
+    "This fixture proves model availability is not authorization.",
+    "This fixture does not call a live provider.",
+    "This fixture denies routing until Trust Chain evidence is complete."
+  ]
+}
