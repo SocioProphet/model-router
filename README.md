@@ -4,7 +4,41 @@ Governed model and service routing for SocioProphet: local vs hosted, small vs l
 
 ## Role
 
-`model-router` decides where a request should go. It does not own model lifecycle, local model carry profiles, or per-user personalization consent.
+`model-router` decides where a request should go. It does not own model lifecycle, local model carry profiles, per-user personalization consent, runtime admission, or provider credential handling.
+
+## Prophet Trust Chain model route decisions
+
+Model Router owns the route-selection slice of Prophet Trust Chain. The platform standard and admission contract live in `SocioProphet/prophet-platform`:
+
+- `docs/standards/PROPHET_TRUST_CHAIN_V0.md`
+- `docs/TRUST_CHAIN_ADMISSION_CONTRACT.md`
+- `docs/standards/PROPHET_TRUST_CHAIN_IMPLEMENTATION_MAP.md`
+
+This repo now carries `TrustChainModelRouteDecision`, which binds a requested model capability to candidate routes, model factsheets, eval receipts, runtime or hosted-provider admission refs, policy profile refs, Guardrail decision refs, cost class, fallback posture, and route effects.
+
+Relevant files:
+
+- `schemas/trust-chain-model-route-decision.v0.1.schema.json`
+- `examples/trust-chain-model-route-decision.allow.json`
+- `examples/trust-chain-model-route-decision.fallback.json`
+- `examples/trust-chain-model-route-decision.deny.json`
+- `tools/validate_trust_chain_model_route_decision.py`
+- `tools/tests/test_trust_chain_model_route_decision.py`
+
+Validation:
+
+```bash
+make validate-trust-chain-model-route-decision
+python3 -m pytest -q tools/tests/test_trust_chain_model_route_decision.py
+```
+
+The allow fixture routes to an admitted local model/runtime with model factsheet, eval receipt, runtime admission, policy profile, and Guardrail evidence present. Provider call and prompt egress remain denied.
+
+The fallback fixture rejects a preferred hosted/provider route because provider admission evidence is missing, then falls back to the admitted local route while preserving local-first routing and prompt-egress denial.
+
+The deny fixture proves fail-closed behavior: when no candidate route has complete Trust Chain evidence, no route is selected and remediation is required before routing.
+
+Boundary: Model Router selects routes under policy and evidence constraints. It does not call live providers, store provider credentials, treat model availability as authorization, replace Model Governance Ledger model promotion evidence, replace Lattice Forge runtime evidence, replace Policy Fabric policy profiles, replace Guardrail Fabric action admission, replace AgentPlane execution evidence, or replace Prophet Platform admission composition.
 
 ## Local + personal routing
 
@@ -98,18 +132,21 @@ The 1B profile is the laptop-safe router/triage/summarization default. The 3B pr
 - Exhausted budget denies or downgrades according to policy rather than silently overrunning.
 - Evidence records route decisions, escalation receipts, budget decisions, resource snapshots, quota snapshots, candidate sets, runtime health, cost class, context policy, tool policy, and governance references.
 - Prompt evidence should be hash-only by default.
+- Model availability is not authorization.
+- Production routing requires admitted or review-gated runtime/provider/model evidence.
 
 ## Boundary
 
 | Repo | Responsibility |
 |---|---|
 | `SourceOS-Linux/sourceos-model-carry` | Local model profiles, service refs, local resource posture, and evidence collectors. |
-| `SocioProphet/model-governance-ledger` | Per-user consent, data boundary, evaluation, promotion, revocation, model-routing escalation receipts, cost-class evidence, and budget/resource audit trails. |
+| `SocioProphet/model-governance-ledger` | Per-user consent, data boundary, evaluation, promotion, revocation, model-routing escalation receipts, cost-class evidence, budget/resource audit trails, and model/runtime Trust Chain bindings. |
 | `SociOS-Linux/socios` | Opt-in orchestration for personalization workflows. |
-| `SocioProphet/model-router` | Runtime route binding, agent execution model-routing policy, budget/resource optimization, SVF receipt-state consumption, and policy-aware target selection. |
+| `SocioProphet/model-router` | Runtime route binding, agent execution model-routing policy, budget/resource optimization, SVF receipt-state consumption, Trust Chain route decisions, and policy-aware target selection. |
 | `SocioProphet/agentplane` | Execution-chain evidence and run/replay artifacts for routed agent work. |
-| `SocioProphet/guardrail-fabric` | Fail-closed policy decisions for tool hooks, model-lane escalation, budget/resource constraints, and write/network gates. |
+| `SocioProphet/guardrail-fabric` | Fail-closed policy decisions for tool hooks, model-lane escalation, budget/resource constraints, Trust Chain action admission, and write/network gates. |
 | `SocioProphet/policy-fabric` | Policy packaging, inheritance, validation, release review, and budget/resource constraint governance. |
+| `SocioProphet/prophet-platform` | Composes final platform admission responses. |
 
 ## Validation
 
@@ -118,5 +155,7 @@ python3 tools/validate_local_personal_route_bindings.py
 python3 tools/validate_agent_execution_model_routing_policies.py
 python3 tools/validate_agent_execution_budget_resource_optimizers.py
 python3 tools/validate_svf_receipt_state_routing.py
+python3 tools/validate_trust_chain_model_route_decision.py
 make validate-svf-receipt-state-routing
+make validate-trust-chain-model-route-decision
 ```
