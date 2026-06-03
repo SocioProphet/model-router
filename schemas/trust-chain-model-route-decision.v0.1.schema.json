@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.socioprophet.dev/model-router/trust-chain-model-route-decision.v0.1.schema.json",
+  "title": "Trust Chain Model Route Decision v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "decision_id", "decision_type", "request", "candidate_routes", "selected_route", "decision", "effects", "non_claims"],
+  "properties": {
+    "schema_version": {"const": "0.1"},
+    "decision_id": {"type": "string", "pattern": "^model-router:trust-chain-route-decision:"},
+    "decision_type": {"const": "TrustChainModelRouteDecision"},
+    "request": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["capability", "environment", "risk_tier", "tenant_ref", "workspace_ref"],
+      "properties": {
+        "capability": {"type": "string"},
+        "environment": {"enum": ["preview", "staging", "production"]},
+        "risk_tier": {"enum": ["internal", "enterprise", "regulated_enterprise"]},
+        "tenant_ref": {"type": "string"},
+        "workspace_ref": {"type": "string"}
+      }
+    },
+    "candidate_routes": {"type": "array", "items": {"type": "object", "additionalProperties": false, "required": ["route_ref", "model_ref", "runtime_or_provider_ref", "trust_chain_refs", "cost_class", "fallback_rank"], "properties": {"route_ref": {"type": "string"}, "model_ref": {"type": "string"}, "runtime_or_provider_ref": {"type": "string"}, "trust_chain_refs": {"type": "object", "additionalProperties": false, "required": ["model_factsheet_ref", "eval_receipt_ref", "runtime_or_provider_admission_ref", "policy_profile_ref", "guardrail_decision_ref"], "properties": {"model_factsheet_ref": {"type": ["string", "null"]}, "eval_receipt_ref": {"type": ["string", "null"]}, "runtime_or_provider_admission_ref": {"type": ["string", "null"]}, "policy_profile_ref": {"type": ["string", "null"]}, "guardrail_decision_ref": {"type": ["string", "null"]}}}, "cost_class": {"enum": ["local", "cheap", "standard", "high_end", "pro"]}, "fallback_rank": {"type": "integer", "minimum": 0}}}, "minItems": 1},
+    "selected_route": {"type": ["string", "null"]},
+    "decision": {"enum": ["allow", "downgrade", "fallback", "deny", "review"]},
+    "effects": {"type": "object", "additionalProperties": false, "required": ["route_allowed", "provider_call_allowed", "prompt_egress_allowed", "fallback_required", "human_review_required"], "properties": {"route_allowed": {"type": "boolean"}, "provider_call_allowed": {"type": "boolean"}, "prompt_egress_allowed": {"type": "boolean"}, "fallback_required": {"type": "boolean"}, "human_review_required": {"type": "boolean"}}},
+    "reason": {"type": "string"},
+    "remediation": {"type": "array", "items": {"type": "object", "additionalProperties": false, "required": ["step_id", "authority", "required_before_route", "instruction"], "properties": {"step_id": {"type": "string"}, "authority": {"type": "string"}, "required_before_route": {"type": "boolean"}, "instruction": {"type": "string"}}}},
+    "non_claims": {"type": "array", "items": {"type": "string"}, "minItems": 1}
+  }
+}
