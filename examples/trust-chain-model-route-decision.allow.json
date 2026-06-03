@@ -1,0 +1,44 @@
+{
+  "schema_version": "0.1",
+  "decision_id": "model-router:trust-chain-route-decision:allow-local-001",
+  "decision_type": "TrustChainModelRouteDecision",
+  "request": {
+    "capability": "summarization",
+    "environment": "production",
+    "risk_tier": "regulated_enterprise",
+    "tenant_ref": "tenant://demo-bank",
+    "workspace_ref": "workspace://professional/demo-ai-ops"
+  },
+  "candidate_routes": [
+    {
+      "route_ref": "model-route://model-router/local-small-language-production",
+      "model_ref": "model://local/small-language@0.1.0",
+      "runtime_or_provider_ref": "runtime-asset://lattice-forge/prophet-python-ml@0.1.0",
+      "trust_chain_refs": {
+        "model_factsheet_ref": "model-ledger:trust-chain-runtime-binding:demo-model-001",
+        "eval_receipt_ref": "eval://demo/summarization-quality@0.1.0",
+        "runtime_or_provider_admission_ref": "trust-chain:admit-artifact-response:demo-runtime-asset-001:allowed",
+        "policy_profile_ref": "policy://trust-chain/model-route/regulated-enterprise-production",
+        "guardrail_decision_ref": "guardrail:decision:trust-chain-runtime-allow-001"
+      },
+      "cost_class": "local",
+      "fallback_rank": 0
+    }
+  ],
+  "selected_route": "model-route://model-router/local-small-language-production",
+  "decision": "allow",
+  "effects": {
+    "route_allowed": true,
+    "provider_call_allowed": false,
+    "prompt_egress_allowed": false,
+    "fallback_required": false,
+    "human_review_required": false
+  },
+  "reason": "Local production route is allowed because model, runtime, policy, eval, and guardrail Trust Chain evidence are present.",
+  "remediation": [],
+  "non_claims": [
+    "This fixture does not call a live provider.",
+    "This fixture does not store provider credentials.",
+    "This fixture treats model availability as insufficient without Trust Chain evidence."
+  ]
+}
