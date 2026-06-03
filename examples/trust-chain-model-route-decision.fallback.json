@@ -1,0 +1,65 @@
+{
+  "schema_version": "0.1",
+  "decision_id": "model-router:trust-chain-route-decision:fallback-local-001",
+  "decision_type": "TrustChainModelRouteDecision",
+  "request": {
+    "capability": "summarization",
+    "environment": "production",
+    "risk_tier": "regulated_enterprise",
+    "tenant_ref": "tenant://demo-bank",
+    "workspace_ref": "workspace://professional/demo-ai-ops"
+  },
+  "candidate_routes": [
+    {
+      "route_ref": "model-route://model-router/preferred-hosted-standard-production",
+      "model_ref": "model://hosted/standard-language@1.0.0",
+      "runtime_or_provider_ref": "provider://hosted/standard-language",
+      "trust_chain_refs": {
+        "model_factsheet_ref": "model-ledger:hosted-provider-binding:standard-language:review-required",
+        "eval_receipt_ref": "eval://demo/summarization-quality@0.1.0",
+        "runtime_or_provider_admission_ref": null,
+        "policy_profile_ref": "policy://trust-chain/model-route/regulated-enterprise-production",
+        "guardrail_decision_ref": "guardrail:decision:model-route-hosted-review-required-001"
+      },
+      "cost_class": "standard",
+      "fallback_rank": 0
+    },
+    {
+      "route_ref": "model-route://model-router/local-small-language-production",
+      "model_ref": "model://local/small-language@0.1.0",
+      "runtime_or_provider_ref": "runtime-asset://lattice-forge/prophet-python-ml@0.1.0",
+      "trust_chain_refs": {
+        "model_factsheet_ref": "model-ledger:trust-chain-runtime-binding:demo-model-001",
+        "eval_receipt_ref": "eval://demo/summarization-quality@0.1.0",
+        "runtime_or_provider_admission_ref": "trust-chain:admit-artifact-response:demo-runtime-asset-001:allowed",
+        "policy_profile_ref": "policy://trust-chain/model-route/regulated-enterprise-production",
+        "guardrail_decision_ref": "guardrail:decision:trust-chain-runtime-allow-001"
+      },
+      "cost_class": "local",
+      "fallback_rank": 1
+    }
+  ],
+  "selected_route": "model-route://model-router/local-small-language-production",
+  "decision": "fallback",
+  "effects": {
+    "route_allowed": true,
+    "provider_call_allowed": false,
+    "prompt_egress_allowed": false,
+    "fallback_required": true,
+    "human_review_required": false
+  },
+  "reason": "Preferred hosted route lacks provider admission evidence, so routing falls back to the admitted local route without prompt egress.",
+  "remediation": [
+    {
+      "step_id": "review-hosted-provider-admission",
+      "authority": "SocioProphet/policy-fabric",
+      "required_before_route": false,
+      "instruction": "Review hosted provider posture before allowing prompt egress for regulated-enterprise production."
+    }
+  ],
+  "non_claims": [
+    "This fixture does not call a live hosted provider.",
+    "This fixture does not store provider credentials.",
+    "Fallback preserves local-first routing when provider evidence is missing."
+  ]
+}
