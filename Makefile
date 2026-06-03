@@ -1,6 +1,6 @@
-.PHONY: validate test emit-demo-decision release-dry-run validate-superconscious-reasoning-route validate-svf-receipt-state-routing
+.PHONY: validate test emit-demo-decision release-dry-run validate-superconscious-reasoning-route validate-svf-receipt-state-routing validate-trust-chain-model-route-decision
 
-validate: validate-superconscious-reasoning-route validate-svf-receipt-state-routing
+validate: validate-superconscious-reasoning-route validate-svf-receipt-state-routing validate-trust-chain-model-route-decision
 	python3 tools/validate_route_examples.py
 
 validate-superconscious-reasoning-route:
@@ -8,6 +8,13 @@ validate-superconscious-reasoning-route:
 
 validate-svf-receipt-state-routing:
 	python3 tools/validate_svf_receipt_state_routing.py
+
+validate-trust-chain-model-route-decision:
+	python3 -m json.tool schemas/trust-chain-model-route-decision.v0.1.schema.json >/dev/null
+	python3 -m json.tool examples/trust-chain-model-route-decision.allow.json >/dev/null
+	python3 -m json.tool examples/trust-chain-model-route-decision.fallback.json >/dev/null
+	python3 -m json.tool examples/trust-chain-model-route-decision.deny.json >/dev/null
+	python3 tools/validate_trust_chain_model_route_decision.py
 
 test:
 	python3 -m pytest -q tools/tests
