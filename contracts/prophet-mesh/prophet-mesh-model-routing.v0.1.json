@@ -1,0 +1,114 @@
+{
+  "schema_version": "0.1.0",
+  "kind": "prophet_mesh_model_routing_mirror",
+  "source_repo": "SocioProphet/prophet-mesh",
+  "source_contracts": [
+    "specs/model-router-interface.yaml",
+    "specs/model-task-policy.yaml",
+    "examples/router-request.email.json",
+    "examples/router-decision.accepted.json",
+    "examples/runtime-release-bundle.accepted.json"
+  ],
+  "release_channel": "private_preview",
+  "routing_posture": "policy_scored_deterministic_preview",
+  "default_conductor": "michael-agent",
+  "required_controls": [
+    "identity",
+    "policy",
+    "evidence",
+    "attestation",
+    "revocation",
+    "audit",
+    "tenant_isolation"
+  ],
+  "model_families": [
+    {
+      "id": "hosted_frontier",
+      "role": "highest-capability hosted reasoning, coding, research, and multimodal fallback",
+      "preferred_routes": ["openai.gpt-5.5", "anthropic.claude-opus-4.8", "google.gemini-3.1-pro"],
+      "requires_hosted_approval": true
+    },
+    {
+      "id": "hosted_balanced",
+      "role": "default hosted productivity, coding, office, and conversational work",
+      "preferred_routes": ["anthropic.claude-sonnet-4.6", "openai.gpt-5.4-mini", "google.gemini-3.5-flash"],
+      "requires_hosted_approval": true
+    },
+    {
+      "id": "hosted_fast",
+      "role": "fast chat, email, text replies, triage, classification, and summarization",
+      "preferred_routes": ["anthropic.claude-haiku-4.5", "google.gemini-3-flash", "openai.gpt-5.4-mini"],
+      "requires_hosted_approval": true
+    },
+    {
+      "id": "open_private",
+      "role": "private, local, self-hosted, customer, and sovereign routes",
+      "preferred_routes": ["meta_llama.llama-4-maverick", "meta_llama.llama-4-scout", "qwen.qwen3-235b-a22b", "qwen.qwen3-32b", "mistral.mistral-large-3"],
+      "requires_hosted_approval": false
+    },
+    {
+      "id": "code_specialist",
+      "role": "code generation, review, repair, and repository patching",
+      "preferred_routes": ["anthropic.claude-sonnet-4.6", "openai.gpt-5.5", "mistral.codestral", "qwen.qwen3-32b"],
+      "requires_hosted_approval": true
+    },
+    {
+      "id": "reasoning_specialist",
+      "role": "math, proof, planning, complex research, and adversarial reasoning",
+      "preferred_routes": ["openai.gpt-5.5", "anthropic.claude-opus-4.8", "deepseek.deepseek-r1", "qwen.qwen3-235b-a22b"],
+      "requires_hosted_approval": true
+    },
+    {
+      "id": "image_specialist",
+      "role": "image generation, editing, design composition, and private image routes",
+      "preferred_routes": ["openai.gpt-image-2", "google.nano-banana-pro", "google.nano-banana-2", "stability.stable-diffusion-3.5"],
+      "requires_hosted_approval": true
+    },
+    {
+      "id": "media_specialist",
+      "role": "video, voice, realtime dialogue, and text-to-speech",
+      "preferred_routes": ["google.veo-3.1", "google.gemini-3.1-flash-live", "google.gemini-3.1-flash-tts", "openai.gpt-realtime-2"],
+      "requires_hosted_approval": true
+    },
+    {
+      "id": "document_specialist",
+      "role": "office documents, OCR, editing, redlining, extraction, and document transformation",
+      "preferred_routes": ["openai.gpt-5.5", "anthropic.claude-sonnet-4.6", "mistral.ocr", "google.gemini-3.5-flash"],
+      "requires_hosted_approval": true
+    }
+  ],
+  "task_routes": [
+    {"task": "chat", "domain": "relationship", "primary_family": "hosted_balanced", "private_family": "open_private", "requires_evidence": true, "external_action_allowed": false},
+    {"task": "text_message_reply", "domain": "communications", "primary_family": "hosted_fast", "private_family": "open_private", "requires_evidence": true, "external_action_allowed": false},
+    {"task": "email_reply", "domain": "communications", "primary_family": "hosted_balanced", "private_family": "open_private", "requires_evidence": true, "external_action_allowed": false, "policy_decision": "requires_approval"},
+    {"task": "office_document_creation", "domain": "office", "primary_family": "document_specialist", "private_family": "open_private", "requires_evidence": true, "external_action_allowed": false},
+    {"task": "office_document_editing", "domain": "office", "primary_family": "document_specialist", "private_family": "open_private", "requires_evidence": true, "external_action_allowed": false},
+    {"task": "research", "domain": "evidence", "primary_family": "hosted_frontier", "private_family": "open_private", "requires_evidence": true, "external_action_allowed": false},
+    {"task": "coding", "domain": "software", "primary_family": "code_specialist", "private_family": "open_private", "requires_evidence": true, "external_action_allowed": false},
+    {"task": "code_review", "domain": "software", "primary_family": "code_specialist", "private_family": "open_private", "requires_evidence": true, "external_action_allowed": false},
+    {"task": "image_generation", "domain": "creative_media", "primary_family": "image_specialist", "private_family": "image_specialist", "requires_evidence": true, "external_action_allowed": false},
+    {"task": "image_editing", "domain": "creative_media", "primary_family": "image_specialist", "private_family": "image_specialist", "requires_evidence": true, "external_action_allowed": false},
+    {"task": "video_generation", "domain": "creative_media", "primary_family": "media_specialist", "private_family": "media_specialist", "requires_evidence": true, "external_action_allowed": false},
+    {"task": "analytics", "domain": "data", "primary_family": "reasoning_specialist", "private_family": "open_private", "requires_evidence": true, "external_action_allowed": false},
+    {"task": "operations_plan", "domain": "operations", "primary_family": "hosted_balanced", "private_family": "open_private", "requires_evidence": true, "external_action_allowed": false, "policy_decision": "requires_approval"},
+    {"task": "legal_compliance_draft", "domain": "governed_professional", "primary_family": "hosted_frontier", "private_family": "open_private", "requires_evidence": true, "external_action_allowed": false},
+    {"task": "scientific_reasoning", "domain": "science_math", "primary_family": "reasoning_specialist", "private_family": "open_private", "requires_evidence": true, "external_action_allowed": false}
+  ],
+  "private_preview_invariants": [
+    "route_selection_must_be_task_policy_explicit",
+    "email_reply_must_require_approval",
+    "external_action_must_not_execute_from_router",
+    "hosted_routes_require_policy_approval",
+    "private_routes_must_remain_first_class",
+    "evidence_and_audit_refs_must_be_emitted",
+    "model_availability_is_not_authorization"
+  ],
+  "non_claims": [
+    "This mirror records Prophet Mesh private-preview model-routing policy only.",
+    "This mirror does not call hosted providers.",
+    "This mirror does not store provider credentials.",
+    "This mirror does not execute external actions.",
+    "This mirror does not certify model safety, model quality, or production autonomy.",
+    "This mirror does not replace Model Governance Ledger promotion evidence, Guardrail Fabric admission, Agent Registry authority, or AgentPlane execution receipts."
+  ]
+}
