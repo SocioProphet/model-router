@@ -1,6 +1,6 @@
-.PHONY: validate test emit-demo-decision release-dry-run validate-superconscious-reasoning-route validate-svf-receipt-state-routing validate-trust-chain-model-route-decision
+.PHONY: validate test emit-demo-decision release-dry-run validate-superconscious-reasoning-route validate-svf-receipt-state-routing validate-trust-chain-model-route-decision validate-prophet-mesh-model-routing
 
-validate: validate-superconscious-reasoning-route validate-svf-receipt-state-routing validate-trust-chain-model-route-decision
+validate: validate-superconscious-reasoning-route validate-svf-receipt-state-routing validate-trust-chain-model-route-decision validate-prophet-mesh-model-routing
 	python3 tools/validate_route_examples.py
 
 validate-superconscious-reasoning-route:
@@ -15,6 +15,10 @@ validate-trust-chain-model-route-decision:
 	python3 -m json.tool examples/trust-chain-model-route-decision.fallback.json >/dev/null
 	python3 -m json.tool examples/trust-chain-model-route-decision.deny.json >/dev/null
 	python3 tools/validate_trust_chain_model_route_decision.py
+
+validate-prophet-mesh-model-routing:
+	python3 -m json.tool contracts/prophet-mesh/prophet-mesh-model-routing.v0.1.json >/dev/null
+	python3 tools/validate_prophet_mesh_model_routing.py
 
 test:
 	python3 -m pytest -q tools/tests
