@@ -1,0 +1,63 @@
+{
+  "id": "sourceos.adapter.summarize.v1",
+  "version": "1.0.0",
+  "displayName": "SourceOS Summarization Adapter v1",
+  "kind": "adapter",
+  "baseBinding": {
+    "baseModelId": "sourceos.base.v3",
+    "baseVersion": "3.0.0",
+    "baseContentHash": "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2"
+  },
+  "artifact": {
+    "contentHash": "deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
+    "sizeBytes": 524288000,
+    "encoding": "tritpack243",
+    "encrypted": true,
+    "wire": "tritrpc"
+  },
+  "interpretability": {
+    "steeringTier": "local",
+    "emitsSteeringDiff": true,
+    "saeFeatureDictRef": "cafe1234cafe1234cafe1234cafe1234cafe1234cafe1234cafe1234cafe1234",
+    "steeringVectors": [
+      "1111111111111111111111111111111111111111111111111111111111111111"
+    ]
+  },
+  "governance": {
+    "guardrailPolicyRef": "guardrail-fabric:policy:summarize-safe-v1",
+    "ontologyRef": "ontogenesis:summarization-domain:v1"
+  },
+  "capability": {
+    "declaredCapabilities": ["inference.text"],
+    "requiredPermissions": ["fs.read:none", "net.egress:none"],
+    "highPrivilege": false
+  },
+  "attestation": {
+    "signer": "sourceos.release.authority",
+    "signature": "3045022100f3a2b1c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2",
+    "hashChain": [
+      "sourceos.adapter.summarize.v1",
+      "deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
+      "guardrail-fabric:policy:summarize-safe-v1",
+      "tritrpc://sourceos.artifacts/adapters/summarize.v1.0.0.pack"
+    ],
+    "hardenedRuntime": true
+  },
+  "evaluation": {
+    "evalFabricRunRef": "eval-fabric:run:summarize-v1-20260610:abc123def456",
+    "epistemicLevel": "empirical",
+    "evaluatedAt": "2026-06-10T00:00:00Z"
+  },
+  "lifecycle": {
+    "installManifest": {
+      "placements": ["/var/sourceos/adapters/summarize.v1.0.0/"],
+      "registryRows": ["model-router:adapters:sourceos.adapter.summarize.v1"]
+    },
+    "retentionPolicy": {
+      "keepVersions": 2,
+      "reapOrphanRows": true
+    }
+  },
+  "createdAt": "2026-06-10T00:00:00Z",
+  "sourceCommit": "9431a9a"
+}

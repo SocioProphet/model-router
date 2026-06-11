@@ -1,6 +1,6 @@
-.PHONY: validate test emit-demo-decision release-dry-run validate-superconscious-reasoning-route validate-svf-receipt-state-routing validate-trust-chain-model-route-decision validate-prophet-mesh-model-routing
+.PHONY: validate test emit-demo-decision release-dry-run validate-superconscious-reasoning-route validate-svf-receipt-state-routing validate-trust-chain-model-route-decision validate-prophet-mesh-model-routing validate-model-catalog-entry
 
-validate: validate-superconscious-reasoning-route validate-svf-receipt-state-routing validate-trust-chain-model-route-decision validate-prophet-mesh-model-routing
+validate: validate-superconscious-reasoning-route validate-svf-receipt-state-routing validate-trust-chain-model-route-decision validate-prophet-mesh-model-routing validate-model-catalog-entry
 	python3 tools/validate_route_examples.py
 
 validate-superconscious-reasoning-route:
@@ -19,6 +19,12 @@ validate-trust-chain-model-route-decision:
 validate-prophet-mesh-model-routing:
 	python3 -m json.tool contracts/prophet-mesh/prophet-mesh-model-routing.v0.1.json >/dev/null
 	python3 tools/validate_prophet_mesh_model_routing.py
+
+validate-model-catalog-entry:
+	python3 -m json.tool schemas/model-catalog-entry.v0.1.schema.json >/dev/null
+	python3 tools/validate_model_catalog_entry.py examples/model-catalog-entry.admitted.json
+	python3 tools/validate_model_catalog_entry.py examples/model-catalog-entry.denied.epistemic-rejected.json --expect-denied
+	python3 tools/validate_model_catalog_entry.py examples/model-catalog-entry.denied.steering-diff-unsupported.json --expect-denied
 
 test:
 	python3 -m pytest -q tools/tests

@@ -1,0 +1,58 @@
+{
+  "_comment": "Denial reason: epistemic_rejected — epistemicLevel is 'rejected'; entry retained for audit only, never loadable.",
+  "id": "sourceos.adapter.summarize.v0-failed-eval",
+  "version": "0.9.0",
+  "displayName": "SourceOS Summarization Adapter v0 (failed eval)",
+  "kind": "adapter",
+  "baseBinding": {
+    "baseModelId": "sourceos.base.v3",
+    "baseVersion": "3.0.0",
+    "baseContentHash": "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2"
+  },
+  "artifact": {
+    "contentHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "sizeBytes": 524288000,
+    "encoding": "tritpack243",
+    "encrypted": true,
+    "wire": "tritrpc"
+  },
+  "interpretability": {
+    "steeringTier": "none",
+    "emitsSteeringDiff": false
+  },
+  "governance": {
+    "guardrailPolicyRef": "guardrail-fabric:policy:summarize-safe-v1"
+  },
+  "capability": {
+    "declaredCapabilities": ["inference.text"],
+    "requiredPermissions": ["fs.read:none", "net.egress:none"],
+    "highPrivilege": false
+  },
+  "attestation": {
+    "signer": "sourceos.release.authority",
+    "signature": "3045022100f3a2b1c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2",
+    "hashChain": [
+      "sourceos.adapter.summarize.v0-failed-eval",
+      "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "guardrail-fabric:policy:summarize-safe-v1",
+      "tritrpc://sourceos.artifacts/adapters/summarize.v0.9.0.pack"
+    ],
+    "hardenedRuntime": true
+  },
+  "evaluation": {
+    "evalFabricRunRef": "eval-fabric:run:summarize-v0-20260601:failed001",
+    "epistemicLevel": "rejected",
+    "evaluatedAt": "2026-06-01T00:00:00Z"
+  },
+  "lifecycle": {
+    "installManifest": {
+      "placements": ["/var/sourceos/adapters/summarize.v0.9.0/"],
+      "registryRows": ["model-router:adapters:sourceos.adapter.summarize.v0-failed-eval"]
+    },
+    "retentionPolicy": {
+      "keepVersions": 2,
+      "reapOrphanRows": true
+    }
+  },
+  "createdAt": "2026-06-01T00:00:00Z"
+}
