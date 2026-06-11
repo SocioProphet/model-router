@@ -1,0 +1,28 @@
+name: model-catalog-entry
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+    paths:
+      - "contracts/sourceos/**"
+      - "schemas/model-catalog-entry.v0.1.schema.json"
+      - "examples/model-catalog-entry.*.json"
+      - "tools/validate_model_catalog_entry.py"
+      - "tools/tests/test_model_catalog_entry.py"
+      - ".github/workflows/model-catalog-entry.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install test dependency
+        run: python3 -m pip install pytest
+      - name: Validate catalog entry examples
+        run: make validate-model-catalog-entry
+      - name: Run admission tests
+        run: python3 -m pytest tools/tests/test_model_catalog_entry.py -v

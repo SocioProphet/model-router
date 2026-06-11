@@ -1,0 +1,131 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "sourceos.model-catalog-entry.v0.1",
+  "title": "ModelCatalogEntry",
+  "description": "SourceOS model/adapter catalog entry contract v0.1. Derived from contracts/sourceos/model-catalog-entry.v0.1.ts.",
+  "type": "object",
+  "required": [
+    "id", "version", "displayName", "kind",
+    "baseBinding", "artifact",
+    "interpretability", "governance", "capability",
+    "attestation", "evaluation", "lifecycle",
+    "createdAt"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "version": { "type": "string", "minLength": 1 },
+    "displayName": { "type": "string", "minLength": 1 },
+    "kind": { "type": "string", "enum": ["base", "adapter", "steering", "guardrail"] },
+    "baseBinding": {
+      "type": "object",
+      "required": ["baseModelId", "baseVersion", "baseContentHash"],
+      "additionalProperties": false,
+      "properties": {
+        "baseModelId": { "type": "string" },
+        "baseVersion": { "type": "string" },
+        "baseContentHash": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+      }
+    },
+    "artifact": {
+      "type": "object",
+      "required": ["contentHash", "sizeBytes", "encoding", "encrypted", "wire"],
+      "additionalProperties": false,
+      "properties": {
+        "contentHash": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "sizeBytes": { "type": "integer", "minimum": 1 },
+        "encoding": {
+          "type": "string",
+          "enum": ["appleencryptedarchive-equiv", "tritpack243", "raw"]
+        },
+        "encrypted": { "type": "boolean", "const": true },
+        "wire": { "type": "string", "enum": ["tritrpc", "https-fallback"] }
+      }
+    },
+    "interpretability": {
+      "type": "object",
+      "required": ["steeringTier", "emitsSteeringDiff"],
+      "additionalProperties": false,
+      "properties": {
+        "saeFeatureDictRef": { "type": "string" },
+        "steeringVectors": { "type": "array", "items": { "type": "string" } },
+        "steeringTier": { "type": "string", "enum": ["full", "local", "none"] },
+        "emitsSteeringDiff": { "type": "boolean" }
+      }
+    },
+    "governance": {
+      "type": "object",
+      "required": ["guardrailPolicyRef"],
+      "additionalProperties": false,
+      "properties": {
+        "guardrailPolicyRef": { "type": "string", "minLength": 1 },
+        "ontologyRef": { "type": "string" }
+      }
+    },
+    "capability": {
+      "type": "object",
+      "required": ["declaredCapabilities", "requiredPermissions", "highPrivilege"],
+      "additionalProperties": false,
+      "properties": {
+        "declaredCapabilities": { "type": "array", "items": { "type": "string" } },
+        "requiredPermissions": { "type": "array", "items": { "type": "string" } },
+        "highPrivilege": { "type": "boolean" }
+      }
+    },
+    "attestation": {
+      "type": "object",
+      "required": ["signer", "signature", "hashChain", "hardenedRuntime"],
+      "additionalProperties": false,
+      "properties": {
+        "signer": { "type": "string", "minLength": 1 },
+        "signature": { "type": "string", "minLength": 1 },
+        "hashChain": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        },
+        "hardenedRuntime": { "type": "boolean" }
+      }
+    },
+    "evaluation": {
+      "type": "object",
+      "required": ["evalFabricRunRef", "epistemicLevel", "evaluatedAt"],
+      "additionalProperties": false,
+      "properties": {
+        "evalFabricRunRef": { "type": "string", "minLength": 1 },
+        "epistemicLevel": {
+          "type": "string",
+          "enum": ["proved", "bounded", "empirical", "synthetic", "speculative", "rejected"]
+        },
+        "evaluatedAt": { "type": "string" }
+      }
+    },
+    "lifecycle": {
+      "type": "object",
+      "required": ["installManifest", "retentionPolicy"],
+      "additionalProperties": false,
+      "properties": {
+        "installManifest": {
+          "type": "object",
+          "required": ["placements", "registryRows"],
+          "additionalProperties": false,
+          "properties": {
+            "placements": { "type": "array", "items": { "type": "string" } },
+            "registryRows": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "retentionPolicy": {
+          "type": "object",
+          "required": ["keepVersions", "reapOrphanRows"],
+          "additionalProperties": false,
+          "properties": {
+            "keepVersions": { "type": "integer", "minimum": 1 },
+            "reapOrphanRows": { "type": "boolean" }
+          }
+        }
+      }
+    },
+    "createdAt": { "type": "string" },
+    "sourceCommit": { "type": "string" }
+  }
+}

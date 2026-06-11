@@ -1,0 +1,62 @@
+{
+  "_comment": "Denial reason: steering_diff_unsupported — steeringTier is 'full' but emitsSteeringDiff is false. Contract requires diff emission when steering is active.",
+  "id": "sourceos.steering.concept-suppressor.v1",
+  "version": "1.0.0",
+  "displayName": "SourceOS Concept Suppressor Steering v1 (missing diff support)",
+  "kind": "steering",
+  "baseBinding": {
+    "baseModelId": "sourceos.base.v3",
+    "baseVersion": "3.0.0",
+    "baseContentHash": "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2"
+  },
+  "artifact": {
+    "contentHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "sizeBytes": 2097152,
+    "encoding": "tritpack243",
+    "encrypted": true,
+    "wire": "tritrpc"
+  },
+  "interpretability": {
+    "steeringTier": "full",
+    "emitsSteeringDiff": false,
+    "saeFeatureDictRef": "cafe1234cafe1234cafe1234cafe1234cafe1234cafe1234cafe1234cafe1234",
+    "steeringVectors": [
+      "2222222222222222222222222222222222222222222222222222222222222222"
+    ]
+  },
+  "governance": {
+    "guardrailPolicyRef": "guardrail-fabric:policy:steering-safe-v1"
+  },
+  "capability": {
+    "declaredCapabilities": ["inference.text", "steering.apply"],
+    "requiredPermissions": ["fs.read:none", "net.egress:none"],
+    "highPrivilege": false
+  },
+  "attestation": {
+    "signer": "sourceos.release.authority",
+    "signature": "3045022100f3a2b1c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2",
+    "hashChain": [
+      "sourceos.steering.concept-suppressor.v1",
+      "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "guardrail-fabric:policy:steering-safe-v1",
+      "tritrpc://sourceos.artifacts/steering/concept-suppressor.v1.0.0.pack"
+    ],
+    "hardenedRuntime": true
+  },
+  "evaluation": {
+    "evalFabricRunRef": "eval-fabric:run:steering-v1-20260610:steer001",
+    "epistemicLevel": "empirical",
+    "evaluatedAt": "2026-06-10T00:00:00Z"
+  },
+  "lifecycle": {
+    "installManifest": {
+      "placements": ["/var/sourceos/steering/concept-suppressor.v1.0.0/"],
+      "registryRows": ["model-router:steering:sourceos.steering.concept-suppressor.v1"]
+    },
+    "retentionPolicy": {
+      "keepVersions": 2,
+      "reapOrphanRows": true
+    }
+  },
+  "createdAt": "2026-06-10T00:00:00Z"
+}
