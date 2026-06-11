@@ -35,6 +35,10 @@ This repository must not store prompts, secrets, datasets, model weights, provid
 
 The first implementation emits local deterministic JSON only.
 
+## v0.2 design notes
+
+See [`docs/model-catalog-entry-v0.2-design-notes.md`](model-catalog-entry-v0.2-design-notes.md) for tracked schema design debt and the gate conditions for a v0.2 bump.
+
 ## Validation
 
 ```bash
