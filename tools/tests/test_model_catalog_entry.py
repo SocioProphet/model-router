@@ -287,3 +287,138 @@ def test_multiple_failures_emit_all_denials():
     assert not result.admitted
     assert "epistemic_rejected" in result.denials
     assert "steering_diff_unsupported" in result.denials
+
+
+# ── Gate 8: egress_target_not_permitted ──────────────────────────────────────
+
+def test_egress_permits_true_with_empty_phases_denies():
+    entry = _admitted()
+    entry["egress"] = {
+        "permitsEgress": True,
+        "targets": [
+            {
+                "host": "api.example.com",
+                "purpose": "inference",
+                "processor": "Example Provider",
+                "wire": "https-fallback",
+                "permittedPhases": []
+            }
+        ]
+    }
+    result = admit_entry(entry)
+    assert not result.admitted
+    assert "egress_target_not_permitted" in result.denials
+
+
+def test_egress_permits_true_with_phases_admits():
+    entry = _admitted()
+    entry["egress"] = {
+        "permitsEgress": True,
+        "targets": [
+            {
+                "host": "evidence.sourceos.internal",
+                "purpose": "provenance",
+                "processor": "SourceOS agentplane",
+                "wire": "tritrpc",
+                "permittedPhases": ["inference"]
+            }
+        ]
+    }
+    result = admit_entry(entry)
+    assert "egress_target_not_permitted" not in result.denials
+
+
+def test_egress_permits_false_empty_targets_admits():
+    entry = _admitted()
+    entry["egress"] = {"permitsEgress": False, "targets": []}
+    result = admit_entry(entry)
+    assert "egress_target_not_permitted" not in result.denials
+
+
+# ── Gate 9: observability_sink_uninitialized ─────────────────────────────────
+
+def test_sink_not_before_io_denies():
+    entry = _admitted()
+    entry["observability"]["sinkInitializesBeforeIO"] = False
+    result = admit_entry(entry)
+    assert not result.admitted
+    assert "observability_sink_uninitialized" in result.denials
+
+
+def test_sink_missing_denies():
+    entry = _admitted()
+    del entry["observability"]["sinkInitializesBeforeIO"]
+    result = admit_entry(entry)
+    assert not result.admitted
+    assert "observability_sink_uninitialized" in result.denials
+
+
+def test_sink_before_io_true_admits():
+    entry = _admitted()
+    entry["observability"]["sinkInitializesBeforeIO"] = True
+    result = admit_entry(entry)
+    assert "observability_sink_uninitialized" not in result.denials
+
+
+# ── Gate 10: cluster_not_admitted ────────────────────────────────────────────
+
+def test_cluster_admission_ref_empty_string_denies():
+    entry = _admitted()
+    entry["clusterAdmissionRef"] = ""
+    result = admit_entry(entry)
+    assert not result.admitted
+    assert "cluster_not_admitted" in result.denials
+
+
+def test_cluster_admission_ref_absent_does_not_deny():
+    entry = _admitted()
+    entry.pop("clusterAdmissionRef", None)
+    result = admit_entry(entry)
+    assert "cluster_not_admitted" not in result.denials
+
+
+def test_cluster_admission_ref_present_admits_and_propagates():
+    entry = _admitted()
+    entry["clusterAdmissionRef"] = "triune-pack-abc123"
+    result = admit_entry(entry)
+    assert "cluster_not_admitted" not in result.denials
+    if result.admitted:
+        assert result.cluster_admission_ref == "triune-pack-abc123"
+
+
+# ── Noetica synthetic fixture ─────────────────────────────────────────────────
+
+NOETICA_PATH = ROOT / "examples" / "model-catalog-entry.noetica-chat.synthetic.json"
+
+
+def test_noetica_synthetic_fixture_admits():
+    result = validate_file(NOETICA_PATH)
+    assert result.admitted, f"noetica synthetic fixture denied: {result.denials}"
+    assert result.denials == []
+
+
+def test_noetica_synthetic_fixture_has_evidence_ref():
+    result = validate_file(NOETICA_PATH)
+    assert result.evidence_ref is not None
+    assert "noetica.chat.m2a" in result.evidence_ref
+
+
+def test_noetica_synthetic_has_full_steering_with_diff():
+    entry = _load(NOETICA_PATH)
+    assert entry["interpretability"]["steeringTier"] == "full"
+    assert entry["interpretability"]["emitsSteeringDiff"] is True
+
+
+def test_noetica_synthetic_all_egress_targets_have_phases():
+    entry = _load(NOETICA_PATH)
+    assert entry["egress"]["permitsEgress"] is True
+    for target in entry["egress"]["targets"]:
+        assert len(target["permittedPhases"]) > 0, f"target {target['host']} has no permittedPhases"
+
+
+def test_noetica_synthetic_no_bootstrap_egress():
+    entry = _load(NOETICA_PATH)
+    for target in entry["egress"]["targets"]:
+        assert "bootstrap" not in target["permittedPhases"], (
+            f"target {target['host']} permits bootstrap egress — requires explicit justification"
+        )

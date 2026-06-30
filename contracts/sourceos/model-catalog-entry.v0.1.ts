@@ -8,12 +8,24 @@
  *  - Anthropic Claude Code / OpenAI Codex (forensic, 2026-06-10): versioned bundle delivery
  *    done well, lifecycle GC done badly (version accumulation, orphan LaunchServices rows),
  *    capability surface gated by runtime prompt rather than declared + policy-admitted.
+ *  - ChatGPT client (forensic, 2026-06-10): egress fans out through a first-party /ces gateway
+ *    to Statsig + Datadog before first frame, undeclared to the user; sentinel gates the send
+ *    path via chat-requirements/{prepare,finalize} before model IO, silently.
  *  - SourceOS differentiators: SAE interpretability, guardrail-fabric policy-as-code,
  *    Ontogenesis ontologies, SCOPE-D epistemic labeling, TriTRPC provenance wire,
  *    no-invisible-authority (everything declared, nothing discovered at runtime).
  *
  * Invariant: a model-router MUST refuse to admit or load an entry that fails
  * attestation, hash, capability-policy, or epistemic-label checks. Admission is the gate.
+ *
+ * v0.1 → v0.2 additions:
+ *  - EgressManifest with per-target permittedPhases (plugs the bootstrap-egress gap)
+ *  - ObservabilitySurface with sinkInitializesBeforeIO and gatedBeforeIO (plugs silent-init gap)
+ *  - ModelCatalogEntry.observability and .egress (both required)
+ *  - AdmissionDenialReason: egress_target_not_permitted, observability_sink_uninitialized,
+ *    cluster_not_admitted
+ *  - AdmissionResult.clusterAdmissionRef: Triune admission-pack cross-reference
+ *  - BaseBinding.baseModelId now optional for kind="base" entries (fixes TS validity)
  */
 
 // ── Enumerations ────────────────────────────────────────────────────────────
@@ -40,11 +52,21 @@ export type EpistemicLevel =
 /** Transport wire. TriTRPC is the SourceOS default (AEAD, byte-exact, ternary-native). */
 export type CarryWire = "tritrpc" | "https-fallback";
 
+/**
+ * Execution phase during which a network target may be contacted.
+ * Declaring permittedPhases per target prevents the bootstrap-egress pattern
+ * (ChatGPT forensic: telemetry fires before the first user frame).
+ */
+export type ExecutionPhase = "bootstrap" | "inference" | "shutdown";
+
 // ── Sub-records ─────────────────────────────────────────────────────────────
 
-/** Exact base-version binding. Forces adapter re-delivery on base change (Apple discipline). */
+/**
+ * Exact base-version binding. Forces adapter re-delivery on base change (Apple discipline).
+ * baseModelId is optional for kind="base" entries (a base IS its own binding).
+ */
 export interface BaseBinding {
-  baseModelId: string;          // e.g. "sourceos.base.v3"
+  baseModelId?: string;         // required for adapter/steering/guardrail; omit for base
   baseVersion: string;          // exact semver; adapter is INVALID against any other
   baseContentHash: string;      // sha256 of the base this entry was trained/verified against
 }
@@ -119,6 +141,50 @@ export interface Lifecycle {
   };
 }
 
+/**
+ * Egress manifest (forensic: ChatGPT client fans telemetry out through a first-party
+ * /ces gateway to Statsig + Datadog, undeclared to the user).
+ * SourceOS keeps the single-gateway pattern but every target is DECLARED here and
+ * admitted by guardrail-fabric. No component may egress to a host not in this list.
+ *
+ * permittedPhases closes the bootstrap-egress gap: a target declared as
+ * inference-only cannot contact the network during bootstrap or shutdown.
+ */
+export interface EgressManifest {
+  targets: Array<{
+    host: string;               // e.g. "evidence.sourceos.internal"
+    purpose: "telemetry" | "provenance" | "experimentation" | "inference" | "feedback";
+    processor: string;          // who actually receives it (first- or third-party), named
+    wire: CarryWire;
+    // Explicit phases this target may be contacted. Absent = no egress in that phase.
+    // bootstrap egress requires explicit justification (audit trigger).
+    permittedPhases: ExecutionPhase[];
+  }>;
+  // If false, the entry asserts it performs no network egress at all.
+  permitsEgress: boolean;
+}
+
+/**
+ * Observability surface (forensic: the entry.client bootstrap installs the telemetry
+ * sink and reads feature flags BEFORE the first frame; sentinel gates the send path via
+ * chat-requirements/{prepare,finalize} BEFORE model IO — both silently).
+ * SourceOS mirrors the ordering but inverts the silence: the provenance sink and the
+ * policy read MUST initialize before any inference is reachable, and every emission and
+ * every gate verdict is surfaced rather than hidden.
+ */
+export interface ObservabilitySurface {
+  provenanceSinkRef: string;    // agentplane evidence sink this entry emits to
+  // What the entry emits as first-class, surfaced events (not silent instrumentation).
+  emits: Array<"timing" | "error" | "feature_activation" | "steering_diff" | "gate_verdict">;
+  // Bootstrap-ordering invariant (the entry.client lesson). Enforced at load:
+  // the sink + policy read come up before model IO is reachable. No unobserved window.
+  // Typed as literal true — false is structurally invalid and admission-denied.
+  sinkInitializesBeforeIO: true;
+  // Action-gate-before-IO (the sentinel/chat-requirements lesson). When true, a
+  // guardrail-fabric admission must clear before inference — and its verdict is emitted.
+  gatedBeforeIO: boolean;
+}
+
 // ── Top-level entry ─────────────────────────────────────────────────────────
 
 export interface ModelCatalogEntry {
@@ -129,7 +195,7 @@ export interface ModelCatalogEntry {
   kind: ArtifactKind;
 
   // Carry
-  baseBinding: BaseBinding;     // omit baseModelId only when kind === "base"
+  baseBinding: BaseBinding;     // baseModelId optional for kind="base"; required otherwise
   artifact: ArtifactRef;
 
   // SourceOS-distinct surfaces (strictly more than Apple's {weights, adapter, hash})
@@ -140,6 +206,16 @@ export interface ModelCatalogEntry {
   // Provenance + admission gates
   attestation: Attestation;
   evaluation: EvaluationRecord;
+
+  // What it emits and where it may egress (declared, surfaced, policy-admitted)
+  observability: ObservabilitySurface;
+  egress: EgressManifest;
+
+  // Cluster-level admission cross-reference.
+  // When set, must be a non-empty Triune admission-pack reference (pack_id or URI).
+  // An explicitly empty string triggers cluster_not_admitted denial.
+  // Omit for synthetic/pre-cluster-admission entries.
+  clusterAdmissionRef?: string;
 
   // Operational
   lifecycle: Lifecycle;
@@ -156,18 +232,25 @@ export type AdmissionDenialReason =
   | "capability_not_granted"
   | "missing_epistemic_label"
   | "epistemic_rejected"
-  | "steering_diff_unsupported"; // entry claims steering but can't emit the diff
+  | "steering_diff_unsupported"    // entry claims steering but can't emit the diff
+  | "egress_target_not_permitted"  // permitsEgress=true but a target lacks permittedPhases
+  | "observability_sink_uninitialized" // sinkInitializesBeforeIO is not true
+  | "cluster_not_admitted";        // clusterAdmissionRef is explicitly empty
 
 export interface AdmissionResult {
   admitted: boolean;
   entryId: string;
   denials: AdmissionDenialReason[];   // empty iff admitted
-  evidenceRef?: string;               // agentplane provenance URI for the admission decision
+  evidenceRef: string;                // always emitted — denied results get a denial URI
+  // Triune cluster admission pack that admitted the node this entry runs on.
+  // Present when the entry carries a clusterAdmissionRef and admission passed.
+  clusterAdmissionRef?: string;
 }
 
 /**
  * Reference admission contract. Implementation lives in model-router; guardrail-fabric
  * owns the capability/policy verdict. Every check here is a hard gate — a single failure
- * denies. The decision itself is emitted as provenance (no silent admission).
+ * denies. The decision itself is always emitted as provenance (no silent admission or
+ * silent denial — AdmissionResult is written to the agentplane sink regardless of outcome).
  */
 export type AdmitEntry = (entry: ModelCatalogEntry) => Promise<AdmissionResult>;

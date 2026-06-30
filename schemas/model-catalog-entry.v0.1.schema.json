@@ -8,8 +8,9 @@
     "id", "version", "displayName", "kind",
     "baseBinding", "artifact",
     "interpretability", "governance", "capability",
-    "attestation", "evaluation", "lifecycle",
-    "createdAt"
+    "attestation", "evaluation",
+    "observability", "egress",
+    "lifecycle", "createdAt"
   ],
   "additionalProperties": false,
   "properties": {
@@ -19,7 +20,7 @@
     "kind": { "type": "string", "enum": ["base", "adapter", "steering", "guardrail"] },
     "baseBinding": {
       "type": "object",
-      "required": ["baseModelId", "baseVersion", "baseContentHash"],
+      "required": ["baseVersion", "baseContentHash"],
       "additionalProperties": false,
       "properties": {
         "baseModelId": { "type": "string" },
@@ -100,6 +101,54 @@
         "evaluatedAt": { "type": "string" }
       }
     },
+    "observability": {
+      "type": "object",
+      "required": ["provenanceSinkRef", "emits", "sinkInitializesBeforeIO", "gatedBeforeIO"],
+      "additionalProperties": false,
+      "properties": {
+        "provenanceSinkRef": { "type": "string", "minLength": 1 },
+        "emits": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["timing", "error", "feature_activation", "steering_diff", "gate_verdict"]
+          }
+        },
+        "sinkInitializesBeforeIO": { "type": "boolean", "const": true },
+        "gatedBeforeIO": { "type": "boolean" }
+      }
+    },
+    "egress": {
+      "type": "object",
+      "required": ["targets", "permitsEgress"],
+      "additionalProperties": false,
+      "properties": {
+        "targets": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["host", "purpose", "processor", "wire", "permittedPhases"],
+            "additionalProperties": false,
+            "properties": {
+              "host": { "type": "string", "minLength": 1 },
+              "purpose": {
+                "type": "string",
+                "enum": ["telemetry", "provenance", "experimentation", "inference", "feedback"]
+              },
+              "processor": { "type": "string", "minLength": 1 },
+              "wire": { "type": "string", "enum": ["tritrpc", "https-fallback"] },
+              "permittedPhases": {
+                "type": "array",
+                "items": { "type": "string", "enum": ["bootstrap", "inference", "shutdown"] },
+                "minItems": 1
+              }
+            }
+          }
+        },
+        "permitsEgress": { "type": "boolean" }
+      }
+    },
+    "clusterAdmissionRef": { "type": "string" },
     "lifecycle": {
       "type": "object",
       "required": ["installManifest", "retentionPolicy"],

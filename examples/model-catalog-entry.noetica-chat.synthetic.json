@@ -1,0 +1,118 @@
+{
+  "_comment": "Synthetic fixture: Noetica Chat Surface M2a as a model-catalog-entry workload candidate. epistemicLevel=synthetic; clusterAdmissionRef is pending Triune admission pack. This fixture is NOT proof of live deployment or live Triune cluster membership.",
+  "id": "noetica.chat.m2a",
+  "version": "m2a.0.1.0",
+  "displayName": "Noetica Chat Surface M2a",
+  "kind": "base",
+  "baseBinding": {
+    "baseVersion": "m2a.0.1.0",
+    "baseContentHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+  },
+  "artifact": {
+    "contentHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+    "sizeBytes": 10485760,
+    "encoding": "tritpack243",
+    "encrypted": true,
+    "wire": "tritrpc"
+  },
+  "interpretability": {
+    "steeringTier": "full",
+    "emitsSteeringDiff": true,
+    "saeFeatureDictRef": "neuronpedia:feature-dict:noetica-m2a:pending-evidence",
+    "steeringVectors": []
+  },
+  "governance": {
+    "guardrailPolicyRef": "guardrail-fabric:policy:noetica-chat-safe-v1",
+    "ontologyRef": "ontogenesis:chat-surface:v1"
+  },
+  "capability": {
+    "declaredCapabilities": [
+      "inference.text",
+      "net.egress:anthropic",
+      "net.egress:openai",
+      "net.egress:neuronpedia",
+      "net.egress:superconscious"
+    ],
+    "requiredPermissions": [
+      "net.egress:api.anthropic.com",
+      "net.egress:api.openai.com",
+      "net.egress:neuronpedia",
+      "net.egress:superconscious"
+    ],
+    "highPrivilege": true
+  },
+  "attestation": {
+    "signer": "sourceos.release.authority",
+    "signature": "3045022100synthetic-noetica-m2a-attestation-placeholder-not-a-real-signature",
+    "hashChain": [
+      "noetica.chat.m2a",
+      "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "guardrail-fabric:policy:noetica-chat-safe-v1",
+      "tritrpc://sourceos.artifacts/noetica/chat.m2a.0.1.0.pack"
+    ],
+    "hardenedRuntime": true
+  },
+  "evaluation": {
+    "evalFabricRunRef": "eval-fabric:run:noetica-m2a-synthetic:pending-live-eval",
+    "epistemicLevel": "synthetic",
+    "evaluatedAt": "2026-06-11T00:00:00Z"
+  },
+  "observability": {
+    "provenanceSinkRef": "agentplane:evidence-sink:noetica.chat.m2a",
+    "emits": ["timing", "error", "feature_activation", "steering_diff", "gate_verdict"],
+    "sinkInitializesBeforeIO": true,
+    "gatedBeforeIO": true
+  },
+  "egress": {
+    "permitsEgress": true,
+    "targets": [
+      {
+        "host": "api.anthropic.com",
+        "purpose": "inference",
+        "processor": "Anthropic PBC (first-party model provider)",
+        "wire": "https-fallback",
+        "permittedPhases": ["inference"]
+      },
+      {
+        "host": "api.openai.com",
+        "purpose": "inference",
+        "processor": "OpenAI LLC (first-party model provider)",
+        "wire": "https-fallback",
+        "permittedPhases": ["inference"]
+      },
+      {
+        "host": "neuronpedia",
+        "purpose": "experimentation",
+        "processor": "Neuronpedia (SAE feature steering; may be localhost agent-machine stub)",
+        "wire": "tritrpc",
+        "permittedPhases": ["inference"]
+      },
+      {
+        "host": "superconscious",
+        "purpose": "provenance",
+        "processor": "SourceOS Superconscious (task submission and evidence relay)",
+        "wire": "tritrpc",
+        "permittedPhases": ["inference", "shutdown"]
+      }
+    ]
+  },
+  "clusterAdmissionRef": "pending:triune-admission-pack-noetica-chat-m2a",
+  "lifecycle": {
+    "installManifest": {
+      "placements": [
+        "/var/sourceos/workloads/noetica/chat.m2a.0.1.0/",
+        "/etc/sourceos/noetica/config/"
+      ],
+      "registryRows": [
+        "model-router:workloads:noetica.chat.m2a",
+        "model-router:egress-grants:noetica.chat.m2a"
+      ]
+    },
+    "retentionPolicy": {
+      "keepVersions": 2,
+      "reapOrphanRows": true
+    }
+  },
+  "createdAt": "2026-06-11T00:00:00Z",
+  "sourceCommit": "pending"
+}
