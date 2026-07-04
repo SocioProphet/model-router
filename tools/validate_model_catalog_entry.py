@@ -3,8 +3,8 @@
 SourceOS model/adapter catalog entry admission validator.
 
 Implements the AdmitEntry contract from contracts/sourceos/model-catalog-entry.v0.1.ts.
-Every check is a hard gate — a single failure denies. No silent admission.
-The admission result is emitted as a provenance record.
+Every check is a hard gate — a single failure denies. No silent admission or silent denial.
+The admission result is always emitted as a provenance record regardless of outcome.
 """
 from __future__ import annotations
 
@@ -30,6 +30,9 @@ CAPABILITY_NOT_GRANTED = "capability_not_granted"
 MISSING_EPISTEMIC_LABEL = "missing_epistemic_label"
 EPISTEMIC_REJECTED = "epistemic_rejected"
 STEERING_DIFF_UNSUPPORTED = "steering_diff_unsupported"
+EGRESS_TARGET_NOT_PERMITTED = "egress_target_not_permitted"
+OBSERVABILITY_SINK_UNINITIALIZED = "observability_sink_uninitialized"
+CLUSTER_NOT_ADMITTED = "cluster_not_admitted"
 
 INADMISSIBLE_EPISTEMIC = {"rejected"}
 REQUIRES_DIFF = {"full", "local"}
@@ -41,15 +44,17 @@ class AdmissionResult:
     entry_id: str
     denials: list[str] = field(default_factory=list)
     evidence_ref: str | None = None
+    cluster_admission_ref: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
         result: dict[str, Any] = {
             "admitted": self.admitted,
             "entryId": self.entry_id,
             "denials": self.denials,
+            "evidenceRef": self.evidence_ref,
         }
-        if self.evidence_ref:
-            result["evidenceRef"] = self.evidence_ref
+        if self.cluster_admission_ref:
+            result["clusterAdmissionRef"] = self.cluster_admission_ref
         return result
 
 
@@ -90,7 +95,6 @@ def admit_entry(
 
     # ── Gate 2: attestation_invalid ────────────────────────────────────────
     # Signer identity, signature, and hash-chain must all be present and non-empty.
-    # The hash-chain must be ordered and cover at minimum: assetId, content, policy, url.
     attestation = entry.get("attestation", {})
     attest_failures = False
     if not isinstance(attestation.get("signer"), str) or not attestation["signer"].strip():
@@ -106,7 +110,7 @@ def admit_entry(
     # ── Gate 3: base_version_mismatch ──────────────────────────────────────
     # Adapters, steering, and guardrail artifacts must declare a fully-specified
     # base binding (non-empty baseModelId + baseVersion + valid baseContentHash).
-    # Base artifacts are self-binding; their baseModelId may be empty (they ARE the base).
+    # Base artifacts are self-binding; their baseModelId may be empty.
     kind = entry.get("kind", "")
     base_binding = entry.get("baseBinding", {})
     if kind != "base":
@@ -119,8 +123,6 @@ def admit_entry(
 
     # ── Gate 4: capability_not_granted ─────────────────────────────────────
     # highPrivilege entries require at least one explicit requiredPermission declared.
-    # An empty requiredPermissions list on a high-privilege entry means the grant
-    # surface is undeclared — guardrail-fabric has nothing to check against.
     capability = entry.get("capability", {})
     if capability.get("highPrivilege") is True:
         perms = capability.get("requiredPermissions", [])
@@ -140,12 +142,37 @@ def admit_entry(
 
     # ── Gate 7: steering_diff_unsupported ──────────────────────────────────
     # When steeringTier is "full" or "local", the entry MUST declare it can emit
-    # a steered-vs-baseline diff. An entry that claims steering but hides the diff
-    # violates the Noetica interpretability invariant.
+    # a steered-vs-baseline diff.
     interp = entry.get("interpretability", {})
     tier = interp.get("steeringTier", "none")
     if tier in REQUIRES_DIFF and interp.get("emitsSteeringDiff") is not True:
         denials.append(STEERING_DIFF_UNSUPPORTED)
+
+    # ── Gate 8: egress_target_not_permitted ────────────────────────────────
+    # If permitsEgress is true, every declared target must have a non-empty
+    # permittedPhases list. A target with no phases declared is undeclared egress.
+    egress = entry.get("egress", {})
+    if egress.get("permitsEgress") is True:
+        for target in egress.get("targets", []):
+            phases = target.get("permittedPhases", [])
+            if not isinstance(phases, list) or len(phases) == 0:
+                denials.append(EGRESS_TARGET_NOT_PERMITTED)
+                break
+
+    # ── Gate 9: observability_sink_uninitialized ───────────────────────────
+    # sinkInitializesBeforeIO must be the literal true. Any other value means
+    # model IO is reachable before the provenance sink is up.
+    observability = entry.get("observability", {})
+    if observability.get("sinkInitializesBeforeIO") is not True:
+        denials.append(OBSERVABILITY_SINK_UNINITIALIZED)
+
+    # ── Gate 10: cluster_not_admitted ──────────────────────────────────────
+    # clusterAdmissionRef explicitly set to "" means the operator declared a cluster
+    # binding but provided no pack reference. Omitting the field entirely is allowed
+    # (synthetic/pre-cluster entries). An empty string is a declared-but-empty ref.
+    cluster_ref = entry.get("clusterAdmissionRef")
+    if isinstance(cluster_ref, str) and cluster_ref.strip() == "":
+        denials.append(CLUSTER_NOT_ADMITTED)
 
     admitted = len(denials) == 0
     evidence_ref = (
@@ -156,6 +183,7 @@ def admit_entry(
         entry_id=entry_id,
         denials=denials,
         evidence_ref=evidence_ref,
+        cluster_admission_ref=cluster_ref if admitted and cluster_ref else None,
     )
 
 
