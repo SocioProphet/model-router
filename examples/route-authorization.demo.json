@@ -1,0 +1,26 @@
+{
+  "schema_version": "0.1.0",
+  "kind": "prophet_mesh_model_route_authorization",
+  "source_repo": "SocioProphet/model-router",
+  "governing_repo": "SocioProphet/model-governance-ledger",
+  "governance_issue": "SocioProphet/model-governance-ledger#29",
+  "realizes_invariant": "model_availability_is_not_authorization",
+  "posture": "fail_closed",
+  "note": "DEMONSTRATION fixture ONLY. This is the runtime authorization mirror consumed by tools/model_router.py emit-demo-decision. It is NOT the production prophet-mesh authorization contract (contracts/prophet-mesh/model-route-authorization.v0.1.json), which remains governed by the Model Governance Ledger. It shows the runtime gate allowing an evidence-backed route and denying an available-but-only-proposed route.",
+  "route_authorizations": [
+    {
+      "route": "meta_llama.llama-4-scout",
+      "status": "authorized",
+      "authorized": true,
+      "promotion_evidence_present": true,
+      "ledger_entry": "model://prophet-mesh/meta_llama/llama-4-scout@demo-authorized"
+    },
+    {
+      "route": "anthropic.claude-opus-4.8",
+      "status": "proposed",
+      "authorized": false,
+      "promotion_evidence_present": false,
+      "ledger_entry": "model://prophet-mesh/anthropic/claude-opus-4.8@proposed"
+    }
+  ]
+}
