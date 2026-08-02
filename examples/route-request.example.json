@@ -13,9 +13,11 @@
     "guardrailRef": "guardrail://fabric/default-safe-text-v1",
     "ledgerRef": "ledger://model-governance/demo",
     "evidenceRef": "evidence://model-router/demo/request-001",
+    "authorizationRef": "examples/route-authorization.demo.json",
     "candidates": [
       {
         "candidateRef": "model://local/small-language@0.1.0",
+        "governanceRoute": "meta_llama.llama-4-scout",
         "locality": "local",
         "sizeClass": "small",
         "costTier": "low",
@@ -27,6 +29,7 @@
       },
       {
         "candidateRef": "model://hosted/frontier-language@0.1.0",
+        "governanceRoute": "anthropic.claude-opus-4.8",
         "locality": "hosted",
         "sizeClass": "large",
         "costTier": "high",
