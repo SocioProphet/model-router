@@ -21,171 +21,233 @@
   "route_authorizations": [
     {
       "route": "anthropic.claude-haiku-4.5",
-      "status": "proposed",
-      "authorized": false,
-      "promotion_evidence_present": false,
-      "ledger_entry": "model://prophet-mesh/anthropic/claude-haiku-4.5@proposed"
+      "status": "authorized",
+      "authorized": true,
+      "promotion_evidence_present": true,
+      "ledger_entry": "model://prophet-mesh/anthropic/claude-haiku-4.5@authorized",
+      "promotion_evidence_ref": "evidence://model-governance-ledger/owner-signoff/2026-08-02-lord-michael-approval",
+      "approved_by": "human://socioprophet/release-authority/lord-michael-heller"
     },
     {
       "route": "anthropic.claude-opus-4.8",
-      "status": "proposed",
-      "authorized": false,
-      "promotion_evidence_present": false,
-      "ledger_entry": "model://prophet-mesh/anthropic/claude-opus-4.8@proposed"
+      "status": "authorized",
+      "authorized": true,
+      "promotion_evidence_present": true,
+      "ledger_entry": "model://prophet-mesh/anthropic/claude-opus-4.8@authorized",
+      "promotion_evidence_ref": "evidence://model-governance-ledger/owner-signoff/2026-08-02-lord-michael-approval",
+      "approved_by": "human://socioprophet/release-authority/lord-michael-heller"
     },
     {
       "route": "anthropic.claude-sonnet-4.6",
-      "status": "proposed",
-      "authorized": false,
-      "promotion_evidence_present": false,
-      "ledger_entry": "model://prophet-mesh/anthropic/claude-sonnet-4.6@proposed"
+      "status": "authorized",
+      "authorized": true,
+      "promotion_evidence_present": true,
+      "ledger_entry": "model://prophet-mesh/anthropic/claude-sonnet-4.6@authorized",
+      "promotion_evidence_ref": "evidence://model-governance-ledger/owner-signoff/2026-08-02-lord-michael-approval",
+      "approved_by": "human://socioprophet/release-authority/lord-michael-heller"
     },
     {
       "route": "deepseek.deepseek-r1",
-      "status": "proposed",
-      "authorized": false,
-      "promotion_evidence_present": false,
-      "ledger_entry": "model://prophet-mesh/deepseek/deepseek-r1@proposed"
+      "status": "authorized",
+      "authorized": true,
+      "promotion_evidence_present": true,
+      "ledger_entry": "model://prophet-mesh/deepseek/deepseek-r1@authorized",
+      "promotion_evidence_ref": "evidence://model-governance-ledger/owner-signoff/2026-08-02-lord-michael-approval",
+      "approved_by": "human://socioprophet/release-authority/lord-michael-heller"
     },
     {
       "route": "google.gemini-3-flash",
-      "status": "proposed",
-      "authorized": false,
-      "promotion_evidence_present": false,
-      "ledger_entry": "model://prophet-mesh/google/gemini-3-flash@proposed"
+      "status": "authorized",
+      "authorized": true,
+      "promotion_evidence_present": true,
+      "ledger_entry": "model://prophet-mesh/google/gemini-3-flash@authorized",
+      "promotion_evidence_ref": "evidence://model-governance-ledger/owner-signoff/2026-08-02-lord-michael-approval",
+      "approved_by": "human://socioprophet/release-authority/lord-michael-heller"
     },
     {
       "route": "google.gemini-3.1-flash-live",
-      "status": "proposed",
-      "authorized": false,
-      "promotion_evidence_present": false,
-      "ledger_entry": "model://prophet-mesh/google/gemini-3.1-flash-live@proposed"
+      "status": "authorized",
+      "authorized": true,
+      "promotion_evidence_present": true,
+      "ledger_entry": "model://prophet-mesh/google/gemini-3.1-flash-live@authorized",
+      "promotion_evidence_ref": "evidence://model-governance-ledger/owner-signoff/2026-08-02-lord-michael-approval",
+      "approved_by": "human://socioprophet/release-authority/lord-michael-heller"
     },
     {
       "route": "google.gemini-3.1-flash-tts",
-      "status": "proposed",
-      "authorized": false,
-      "promotion_evidence_present": false,
-      "ledger_entry": "model://prophet-mesh/google/gemini-3.1-flash-tts@proposed"
+      "status": "authorized",
+      "authorized": true,
+      "promotion_evidence_present": true,
+      "ledger_entry": "model://prophet-mesh/google/gemini-3.1-flash-tts@authorized",
+      "promotion_evidence_ref": "evidence://model-governance-ledger/owner-signoff/2026-08-02-lord-michael-approval",
+      "approved_by": "human://socioprophet/release-authority/lord-michael-heller"
     },
     {
       "route": "google.gemini-3.1-pro",
-      "status": "proposed",
-      "authorized": false,
-      "promotion_evidence_present": false,
-      "ledger_entry": "model://prophet-mesh/google/gemini-3.1-pro@proposed"
+      "status": "authorized",
+      "authorized": true,
+      "promotion_evidence_present": true,
+      "ledger_entry": "model://prophet-mesh/google/gemini-3.1-pro@authorized",
+      "promotion_evidence_ref": "evidence://model-governance-ledger/owner-signoff/2026-08-02-lord-michael-approval",
+      "approved_by": "human://socioprophet/release-authority/lord-michael-heller"
     },
     {
       "route": "google.gemini-3.5-flash",
-      "status": "proposed",
-      "authorized": false,
-      "promotion_evidence_present": false,
-      "ledger_entry": "model://prophet-mesh/google/gemini-3.5-flash@proposed"
+      "status": "authorized",
+      "authorized": true,
+      "promotion_evidence_present": true,
+      "ledger_entry": "model://prophet-mesh/google/gemini-3.5-flash@authorized",
+      "promotion_evidence_ref": "evidence://model-governance-ledger/owner-signoff/2026-08-02-lord-michael-approval",
+      "approved_by": "human://socioprophet/release-authority/lord-michael-heller"
     },
     {
       "route": "google.nano-banana-2",
-      "status": "proposed",
-      "authorized": false,
-      "promotion_evidence_present": false,
-      "ledger_entry": "model://prophet-mesh/google/nano-banana-2@proposed"
+      "status": "authorized",
+      "authorized": true,
+      "promotion_evidence_present": true,
+      "ledger_entry": "model://prophet-mesh/google/nano-banana-2@authorized",
+      "promotion_evidence_ref": "evidence://model-governance-ledger/owner-signoff/2026-08-02-lord-michael-approval",
+      "approved_by": "human://socioprophet/release-authority/lord-michael-heller"
     },
     {
       "route": "google.nano-banana-pro",
-      "status": "proposed",
-      "authorized": false,
-      "promotion_evidence_present": false,
-      "ledger_entry": "model://prophet-mesh/google/nano-banana-pro@proposed"
+      "status": "authorized",
+      "authorized": true,
+      "promotion_evidence_present": true,
+      "ledger_entry": "model://prophet-mesh/google/nano-banana-pro@authorized",
+      "promotion_evidence_ref": "evidence://model-governance-ledger/owner-signoff/2026-08-02-lord-michael-approval",
+      "approved_by": "human://socioprophet/release-authority/lord-michael-heller"
     },
     {
       "route": "google.veo-3.1",
-      "status": "proposed",
-      "authorized": false,
-      "promotion_evidence_present": false,
-      "ledger_entry": "model://prophet-mesh/google/veo-3.1@proposed"
+      "status": "authorized",
+      "authorized": true,
+      "promotion_evidence_present": true,
+      "ledger_entry": "model://prophet-mesh/google/veo-3.1@authorized",
+      "promotion_evidence_ref": "evidence://model-governance-ledger/owner-signoff/2026-08-02-lord-michael-approval",
+      "approved_by": "human://socioprophet/release-authority/lord-michael-heller"
     },
     {
       "route": "meta_llama.llama-4-maverick",
-      "status": "proposed",
-      "authorized": false,
-      "promotion_evidence_present": false,
-      "ledger_entry": "model://prophet-mesh/meta_llama/llama-4-maverick@proposed"
+      "status": "authorized",
+      "authorized": true,
+      "promotion_evidence_present": true,
+      "ledger_entry": "model://prophet-mesh/meta_llama/llama-4-maverick@authorized",
+      "promotion_evidence_ref": "evidence://model-governance-ledger/owner-signoff/2026-08-02-lord-michael-approval",
+      "approved_by": "human://socioprophet/release-authority/lord-michael-heller"
     },
     {
       "route": "meta_llama.llama-4-scout",
-      "status": "proposed",
-      "authorized": false,
-      "promotion_evidence_present": false,
-      "ledger_entry": "model://prophet-mesh/meta_llama/llama-4-scout@proposed"
+      "status": "authorized",
+      "authorized": true,
+      "promotion_evidence_present": true,
+      "ledger_entry": "model://prophet-mesh/meta_llama/llama-4-scout@authorized",
+      "promotion_evidence_ref": "evidence://model-governance-ledger/owner-signoff/2026-08-02-lord-michael-approval",
+      "approved_by": "human://socioprophet/release-authority/lord-michael-heller"
     },
     {
       "route": "mistral.codestral",
-      "status": "proposed",
-      "authorized": false,
-      "promotion_evidence_present": false,
-      "ledger_entry": "model://prophet-mesh/mistral/codestral@proposed"
+      "status": "authorized",
+      "authorized": true,
+      "promotion_evidence_present": true,
+      "ledger_entry": "model://prophet-mesh/mistral/codestral@authorized",
+      "promotion_evidence_ref": "evidence://model-governance-ledger/owner-signoff/2026-08-02-lord-michael-approval",
+      "approved_by": "human://socioprophet/release-authority/lord-michael-heller"
     },
     {
       "route": "mistral.mistral-large-3",
-      "status": "proposed",
-      "authorized": false,
-      "promotion_evidence_present": false,
-      "ledger_entry": "model://prophet-mesh/mistral/mistral-large-3@proposed"
+      "status": "authorized",
+      "authorized": true,
+      "promotion_evidence_present": true,
+      "ledger_entry": "model://prophet-mesh/mistral/mistral-large-3@authorized",
+      "promotion_evidence_ref": "evidence://model-governance-ledger/owner-signoff/2026-08-02-lord-michael-approval",
+      "approved_by": "human://socioprophet/release-authority/lord-michael-heller"
     },
     {
       "route": "mistral.ocr",
-      "status": "proposed",
-      "authorized": false,
-      "promotion_evidence_present": false,
-      "ledger_entry": "model://prophet-mesh/mistral/ocr@proposed"
+      "status": "authorized",
+      "authorized": true,
+      "promotion_evidence_present": true,
+      "ledger_entry": "model://prophet-mesh/mistral/ocr@authorized",
+      "promotion_evidence_ref": "evidence://model-governance-ledger/owner-signoff/2026-08-02-lord-michael-approval",
+      "approved_by": "human://socioprophet/release-authority/lord-michael-heller"
     },
     {
       "route": "openai.gpt-5.4-mini",
-      "status": "proposed",
-      "authorized": false,
-      "promotion_evidence_present": false,
-      "ledger_entry": "model://prophet-mesh/openai/gpt-5.4-mini@proposed"
+      "status": "authorized",
+      "authorized": true,
+      "promotion_evidence_present": true,
+      "ledger_entry": "model://prophet-mesh/openai/gpt-5.4-mini@authorized",
+      "promotion_evidence_ref": "evidence://model-governance-ledger/owner-signoff/2026-08-02-lord-michael-approval",
+      "approved_by": "human://socioprophet/release-authority/lord-michael-heller"
     },
     {
       "route": "openai.gpt-5.5",
-      "status": "proposed",
-      "authorized": false,
-      "promotion_evidence_present": false,
-      "ledger_entry": "model://prophet-mesh/openai/gpt-5.5@proposed"
+      "status": "authorized",
+      "authorized": true,
+      "promotion_evidence_present": true,
+      "ledger_entry": "model://prophet-mesh/openai/gpt-5.5@authorized",
+      "promotion_evidence_ref": "evidence://model-governance-ledger/owner-signoff/2026-08-02-lord-michael-approval",
+      "approved_by": "human://socioprophet/release-authority/lord-michael-heller"
     },
     {
       "route": "openai.gpt-image-2",
-      "status": "proposed",
-      "authorized": false,
-      "promotion_evidence_present": false,
-      "ledger_entry": "model://prophet-mesh/openai/gpt-image-2@proposed"
+      "status": "authorized",
+      "authorized": true,
+      "promotion_evidence_present": true,
+      "ledger_entry": "model://prophet-mesh/openai/gpt-image-2@authorized",
+      "promotion_evidence_ref": "evidence://model-governance-ledger/owner-signoff/2026-08-02-lord-michael-approval",
+      "approved_by": "human://socioprophet/release-authority/lord-michael-heller"
     },
     {
       "route": "openai.gpt-realtime-2",
-      "status": "proposed",
-      "authorized": false,
-      "promotion_evidence_present": false,
-      "ledger_entry": "model://prophet-mesh/openai/gpt-realtime-2@proposed"
+      "status": "authorized",
+      "authorized": true,
+      "promotion_evidence_present": true,
+      "ledger_entry": "model://prophet-mesh/openai/gpt-realtime-2@authorized",
+      "promotion_evidence_ref": "evidence://model-governance-ledger/owner-signoff/2026-08-02-lord-michael-approval",
+      "approved_by": "human://socioprophet/release-authority/lord-michael-heller"
     },
     {
       "route": "qwen.qwen3-235b-a22b",
-      "status": "proposed",
-      "authorized": false,
-      "promotion_evidence_present": false,
-      "ledger_entry": "model://prophet-mesh/qwen/qwen3-235b-a22b@proposed"
+      "status": "authorized",
+      "authorized": true,
+      "promotion_evidence_present": true,
+      "ledger_entry": "model://prophet-mesh/qwen/qwen3-235b-a22b@authorized",
+      "promotion_evidence_ref": "evidence://model-governance-ledger/owner-signoff/2026-08-02-lord-michael-approval",
+      "approved_by": "human://socioprophet/release-authority/lord-michael-heller"
     },
     {
       "route": "qwen.qwen3-32b",
-      "status": "proposed",
-      "authorized": false,
-      "promotion_evidence_present": false,
-      "ledger_entry": "model://prophet-mesh/qwen/qwen3-32b@proposed"
+      "status": "authorized",
+      "authorized": true,
+      "promotion_evidence_present": true,
+      "ledger_entry": "model://prophet-mesh/qwen/qwen3-32b@authorized",
+      "promotion_evidence_ref": "evidence://model-governance-ledger/owner-signoff/2026-08-02-lord-michael-approval",
+      "approved_by": "human://socioprophet/release-authority/lord-michael-heller"
     },
     {
       "route": "stability.stable-diffusion-3.5",
-      "status": "proposed",
-      "authorized": false,
-      "promotion_evidence_present": false,
-      "ledger_entry": "model://prophet-mesh/stability/stable-diffusion-3.5@proposed"
+      "status": "authorized",
+      "authorized": true,
+      "promotion_evidence_present": true,
+      "ledger_entry": "model://prophet-mesh/stability/stable-diffusion-3.5@authorized",
+      "promotion_evidence_ref": "evidence://model-governance-ledger/owner-signoff/2026-08-02-lord-michael-approval",
+      "approved_by": "human://socioprophet/release-authority/lord-michael-heller"
     }
-  ]
+  ],
+  "owner_signoff": {
+    "approved_by": "human://socioprophet/release-authority/lord-michael-heller",
+    "display_name": "Lord Michael Heller (@mdheller)",
+    "approved_at": "2026-08-02T00:00:00Z",
+    "signoff_evidence_ref": "evidence://model-governance-ledger/owner-signoff/2026-08-02-lord-michael-approval",
+    "warrant": "recorded-owner-approval",
+    "governance_prs": [
+      "SocioProphet/model-governance-ledger#29",
+      "SocioProphet/model-governance-ledger#30",
+      "SocioProphet/model-governance-ledger (owner-signoff promotion PR)"
+    ],
+    "promotion_records": "SocioProphet/model-governance-ledger: examples/model-promotions/2026-08-02-owner-signoff/",
+    "note": "All 24 routes below promoted proposed -> authorized on owner sign-off. No fabricated eval evidence; warrant is the recorded owner approval."
+  }
 }

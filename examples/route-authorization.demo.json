@@ -6,21 +6,23 @@
   "governance_issue": "SocioProphet/model-governance-ledger#29",
   "realizes_invariant": "model_availability_is_not_authorization",
   "posture": "fail_closed",
-  "note": "DEMONSTRATION fixture ONLY. This is the runtime authorization mirror consumed by tools/model_router.py emit-demo-decision. It is NOT the production prophet-mesh authorization contract (contracts/prophet-mesh/model-route-authorization.v0.1.json), which remains governed by the Model Governance Ledger. It shows the runtime gate allowing an evidence-backed route and denying an available-but-only-proposed route.",
+  "note": "DEMONSTRATION fixture ONLY. This is the runtime authorization mirror consumed by tools/model_router.py emit-demo-decision. It is NOT the production prophet-mesh authorization contract (contracts/prophet-mesh/model-route-authorization.v0.1.json), which remains governed by the Model Governance Ledger. As of 2026-08-02 both demo routes are owner-authorized (Lord Michael sign-off), so emit-demo now ROUTES to the local model and offers the hosted model as an authorized fallback -- the hosted route was previously 'proposed' and blocked at runtime. Runtime deny-teeth for still-unauthorized / unledgered models are proven in tools/tests (phantom + empty-authorization + no-governance-route cases).",
   "route_authorizations": [
     {
       "route": "meta_llama.llama-4-scout",
       "status": "authorized",
       "authorized": true,
       "promotion_evidence_present": true,
-      "ledger_entry": "model://prophet-mesh/meta_llama/llama-4-scout@demo-authorized"
+      "ledger_entry": "model://prophet-mesh/meta_llama/llama-4-scout@authorized"
     },
     {
       "route": "anthropic.claude-opus-4.8",
-      "status": "proposed",
-      "authorized": false,
-      "promotion_evidence_present": false,
-      "ledger_entry": "model://prophet-mesh/anthropic/claude-opus-4.8@proposed"
+      "status": "authorized",
+      "authorized": true,
+      "promotion_evidence_present": true,
+      "ledger_entry": "model://prophet-mesh/anthropic/claude-opus-4.8@authorized",
+      "promotion_evidence_ref": "evidence://model-governance-ledger/owner-signoff/2026-08-02-lord-michael-approval",
+      "approved_by": "human://socioprophet/release-authority/lord-michael-heller"
     }
   ]
 }

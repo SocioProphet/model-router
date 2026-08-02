@@ -39,12 +39,28 @@ def test_unledgered_routed_model_fails_closed():
     assert any("phantom.unledgered-model" in e and "UNAUTHORIZED" in e for e in errors)
 
 
-def test_proposed_record_is_not_runtime_authorized():
-    # A scaffolded 'proposed' entry is available but NOT authorization.
+def test_all_production_routes_are_owner_authorized():
+    # As of the 2026-08-02 owner sign-off, every route in the production mirror
+    # is authorized with promotion evidence -> runtime-routable.
     authz = _authorization()
-    route = authz["route_authorizations"][0]["route"]
-    assert authz["route_authorizations"][0]["status"] == "proposed"
-    assert is_route_authorized(route, authz) is False
+    assert authz["route_authorizations"], "expected route authorizations"
+    for rec in authz["route_authorizations"]:
+        assert rec["status"] == "authorized"
+        assert rec["authorized"] is True
+        assert rec["promotion_evidence_present"] is True
+        assert is_route_authorized(rec["route"], authz) is True
+
+
+def test_proposed_record_is_not_runtime_authorized():
+    # A scaffolded 'proposed' entry is available but NOT authorization. Proven
+    # against a synthetic proposed record so the invariant holds independent of
+    # the current production governance state.
+    authz = copy.deepcopy(_authorization())
+    rec = authz["route_authorizations"][0]
+    rec["status"] = "proposed"
+    rec["authorized"] = False
+    rec["promotion_evidence_present"] = False
+    assert is_route_authorized(rec["route"], authz) is False
 
 
 def test_authorized_requires_promotion_evidence():

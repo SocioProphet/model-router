@@ -103,17 +103,48 @@ def test_runtime_denies_candidate_without_governance_route() -> None:
     assert set(decision["spec"]["blockedCandidateRefs"]) == set(decision["spec"]["candidateRefs"])
 
 
-def test_runtime_denies_against_production_proposed_contract() -> None:
-    # Teeth vs the REAL governance state: the production authorization contract
-    # currently lists every route as 'proposed'. With no override, route() reads
-    # that contract and denies every available demo candidate. This is the exact
-    # gap that was CI-only before: at runtime the model is now blocked.
+def test_runtime_routes_owner_authorized_model_against_production_contract() -> None:
+    # EFFECT of the 2026-08-02 owner sign-off: the production authorization
+    # contract now lists all 24 routes as 'authorized'. With no override, route()
+    # reads that contract and the previously-blocked demo candidate now ROUTES.
+    # This is the exact gap that was CI-only before: at runtime the model is now
+    # authorized (was 'unauthorized-unledgered-model').
     request = model_router.load_json(ROOT / "examples" / "route-request.example.json")
     request["spec"].pop("authorizationRef", None)  # fall through to production contract
     policy = model_router.load_json(ROOT / "examples" / "route-policy.example.json")
     decision = model_router.route(request, policy)  # default = production contract
-    assert decision["spec"]["decisionStatus"] == "blocked"
-    assert decision["spec"]["selectedCandidateRef"] == ""
+    assert decision["spec"]["decisionStatus"] == "selected"
+    assert decision["spec"]["selectedCandidateRef"] == "model://local/small-language@0.1.0"
+    assert decision["spec"]["selectedGovernanceRoute"] == "meta_llama.llama-4-scout"
+    assert "authorized" in decision["spec"]["reasonCodes"]
+    # Both demo governance routes are owner-authorized -> nothing blocked.
+    assert decision["spec"]["blockedCandidateRefs"] == []
+
+
+def test_runtime_still_denies_unledgered_route_against_production_contract() -> None:
+    # TEETH preserved after the sign-off: a candidate whose governance route is
+    # NOT among the owner-authorized routes is still fail-closed at runtime,
+    # even reading the production contract directly.
+    request = model_router.load_json(ROOT / "examples" / "route-request.example.json")
+    request["spec"].pop("authorizationRef", None)  # fall through to production contract
+    request["spec"]["candidates"].append(
+        {
+            "candidateRef": "model://hosted/unledgered-frontier@9.9.9",
+            "governanceRoute": "phantom.unledgered-model",
+            "locality": "hosted",
+            "sizeClass": "large",
+            "costTier": "high",
+            "latencyTier": "medium",
+            "qualityTier": "high",
+            "evalConfidence": 0.99,
+            "guardrailCompatible": True,
+            "supportedTasks": ["summarize", "reason", "extract"],
+        }
+    )
+    policy = model_router.load_json(ROOT / "examples" / "route-policy.example.json")
+    decision = model_router.route(request, policy)
+    assert "model://hosted/unledgered-frontier@9.9.9" in decision["spec"]["blockedCandidateRefs"]
+    assert decision["spec"]["selectedCandidateRef"] != "model://hosted/unledgered-frontier@9.9.9"
 
 
 def test_route_blocks_when_threshold_excludes_all_candidates() -> None:
