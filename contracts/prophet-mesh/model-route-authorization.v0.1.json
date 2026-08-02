@@ -1,0 +1,191 @@
+{
+  "schema_version": "0.1.0",
+  "kind": "prophet_mesh_model_route_authorization",
+  "source_repo": "SocioProphet/model-router",
+  "governing_repo": "SocioProphet/model-governance-ledger",
+  "governance_issue": "SocioProphet/model-governance-ledger#29",
+  "model_plane_ref": "SocioProphet/prophet-platform#240",
+  "realizes_invariant": "model_availability_is_not_authorization",
+  "routing_mirror": "contracts/prophet-mesh/prophet-mesh-model-routing.v0.1.json",
+  "posture": "fail_closed",
+  "authorization_states": {
+    "authorized": "Model Governance Ledger promotion evidence present and approved by a release authority; routable at runtime.",
+    "proposed": "Ledger entry scaffolded and awaiting human governance sign-off; recorded but NOT routable at runtime.",
+    "denied": "Explicitly denied by governance; NOT routable at runtime."
+  },
+  "non_claims": [
+    "A 'proposed' record is NOT an authorization and MUST NOT be treated as promotion evidence.",
+    "This mirror does not approve, promote, or certify any model; approval happens only in SocioProphet/model-governance-ledger by a release authority.",
+    "Presence of a route in the routing mirror (availability) never implies authorization."
+  ],
+  "route_authorizations": [
+    {
+      "route": "anthropic.claude-haiku-4.5",
+      "status": "proposed",
+      "authorized": false,
+      "promotion_evidence_present": false,
+      "ledger_entry": "model://prophet-mesh/anthropic/claude-haiku-4.5@proposed"
+    },
+    {
+      "route": "anthropic.claude-opus-4.8",
+      "status": "proposed",
+      "authorized": false,
+      "promotion_evidence_present": false,
+      "ledger_entry": "model://prophet-mesh/anthropic/claude-opus-4.8@proposed"
+    },
+    {
+      "route": "anthropic.claude-sonnet-4.6",
+      "status": "proposed",
+      "authorized": false,
+      "promotion_evidence_present": false,
+      "ledger_entry": "model://prophet-mesh/anthropic/claude-sonnet-4.6@proposed"
+    },
+    {
+      "route": "deepseek.deepseek-r1",
+      "status": "proposed",
+      "authorized": false,
+      "promotion_evidence_present": false,
+      "ledger_entry": "model://prophet-mesh/deepseek/deepseek-r1@proposed"
+    },
+    {
+      "route": "google.gemini-3-flash",
+      "status": "proposed",
+      "authorized": false,
+      "promotion_evidence_present": false,
+      "ledger_entry": "model://prophet-mesh/google/gemini-3-flash@proposed"
+    },
+    {
+      "route": "google.gemini-3.1-flash-live",
+      "status": "proposed",
+      "authorized": false,
+      "promotion_evidence_present": false,
+      "ledger_entry": "model://prophet-mesh/google/gemini-3.1-flash-live@proposed"
+    },
+    {
+      "route": "google.gemini-3.1-flash-tts",
+      "status": "proposed",
+      "authorized": false,
+      "promotion_evidence_present": false,
+      "ledger_entry": "model://prophet-mesh/google/gemini-3.1-flash-tts@proposed"
+    },
+    {
+      "route": "google.gemini-3.1-pro",
+      "status": "proposed",
+      "authorized": false,
+      "promotion_evidence_present": false,
+      "ledger_entry": "model://prophet-mesh/google/gemini-3.1-pro@proposed"
+    },
+    {
+      "route": "google.gemini-3.5-flash",
+      "status": "proposed",
+      "authorized": false,
+      "promotion_evidence_present": false,
+      "ledger_entry": "model://prophet-mesh/google/gemini-3.5-flash@proposed"
+    },
+    {
+      "route": "google.nano-banana-2",
+      "status": "proposed",
+      "authorized": false,
+      "promotion_evidence_present": false,
+      "ledger_entry": "model://prophet-mesh/google/nano-banana-2@proposed"
+    },
+    {
+      "route": "google.nano-banana-pro",
+      "status": "proposed",
+      "authorized": false,
+      "promotion_evidence_present": false,
+      "ledger_entry": "model://prophet-mesh/google/nano-banana-pro@proposed"
+    },
+    {
+      "route": "google.veo-3.1",
+      "status": "proposed",
+      "authorized": false,
+      "promotion_evidence_present": false,
+      "ledger_entry": "model://prophet-mesh/google/veo-3.1@proposed"
+    },
+    {
+      "route": "meta_llama.llama-4-maverick",
+      "status": "proposed",
+      "authorized": false,
+      "promotion_evidence_present": false,
+      "ledger_entry": "model://prophet-mesh/meta_llama/llama-4-maverick@proposed"
+    },
+    {
+      "route": "meta_llama.llama-4-scout",
+      "status": "proposed",
+      "authorized": false,
+      "promotion_evidence_present": false,
+      "ledger_entry": "model://prophet-mesh/meta_llama/llama-4-scout@proposed"
+    },
+    {
+      "route": "mistral.codestral",
+      "status": "proposed",
+      "authorized": false,
+      "promotion_evidence_present": false,
+      "ledger_entry": "model://prophet-mesh/mistral/codestral@proposed"
+    },
+    {
+      "route": "mistral.mistral-large-3",
+      "status": "proposed",
+      "authorized": false,
+      "promotion_evidence_present": false,
+      "ledger_entry": "model://prophet-mesh/mistral/mistral-large-3@proposed"
+    },
+    {
+      "route": "mistral.ocr",
+      "status": "proposed",
+      "authorized": false,
+      "promotion_evidence_present": false,
+      "ledger_entry": "model://prophet-mesh/mistral/ocr@proposed"
+    },
+    {
+      "route": "openai.gpt-5.4-mini",
+      "status": "proposed",
+      "authorized": false,
+      "promotion_evidence_present": false,
+      "ledger_entry": "model://prophet-mesh/openai/gpt-5.4-mini@proposed"
+    },
+    {
+      "route": "openai.gpt-5.5",
+      "status": "proposed",
+      "authorized": false,
+      "promotion_evidence_present": false,
+      "ledger_entry": "model://prophet-mesh/openai/gpt-5.5@proposed"
+    },
+    {
+      "route": "openai.gpt-image-2",
+      "status": "proposed",
+      "authorized": false,
+      "promotion_evidence_present": false,
+      "ledger_entry": "model://prophet-mesh/openai/gpt-image-2@proposed"
+    },
+    {
+      "route": "openai.gpt-realtime-2",
+      "status": "proposed",
+      "authorized": false,
+      "promotion_evidence_present": false,
+      "ledger_entry": "model://prophet-mesh/openai/gpt-realtime-2@proposed"
+    },
+    {
+      "route": "qwen.qwen3-235b-a22b",
+      "status": "proposed",
+      "authorized": false,
+      "promotion_evidence_present": false,
+      "ledger_entry": "model://prophet-mesh/qwen/qwen3-235b-a22b@proposed"
+    },
+    {
+      "route": "qwen.qwen3-32b",
+      "status": "proposed",
+      "authorized": false,
+      "promotion_evidence_present": false,
+      "ledger_entry": "model://prophet-mesh/qwen/qwen3-32b@proposed"
+    },
+    {
+      "route": "stability.stable-diffusion-3.5",
+      "status": "proposed",
+      "authorized": false,
+      "promotion_evidence_present": false,
+      "ledger_entry": "model://prophet-mesh/stability/stable-diffusion-3.5@proposed"
+    }
+  ]
+}
