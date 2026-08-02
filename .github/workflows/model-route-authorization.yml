@@ -1,0 +1,32 @@
+name: model-route-authorization
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+    paths:
+      - "contracts/prophet-mesh/prophet-mesh-model-routing.v0.1.json"
+      - "contracts/prophet-mesh/model-route-authorization.v0.1.json"
+      - "tools/validate_model_route_authorization.py"
+      - "tools/tests/test_model_route_authorization.py"
+      - ".github/workflows/model-route-authorization.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install test runner
+        run: python3 -m pip install --upgrade pip pytest
+      - name: Fail-closed model-route authorization gate
+        run: make validate-model-route-authorization
+      - name: Gate teeth tests (both directions)
+        run: pytest -q tools/tests/test_model_route_authorization.py
